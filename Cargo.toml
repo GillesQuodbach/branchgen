@@ -2,5 +2,34 @@
 name = "branchgen"
 version = "0.1.0"
 edition = "2024"
+description = "CLI to generate formatted Git branches, commits and PR titles"
+authors = ["GQUO Team Aspicot"]
 
 [dependencies]
+# CLI parsing (arguments + sous-commandes)
+clap = { version = "4.5", features = ["derive"] }
+
+# Prompts interactifs (listes, input texte, confirmation)
+dialoguer = "0.11"
+
+# Couleurs terminal
+owo-colors = "4.0"
+
+# Sérialisation JSON
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Gestion d'erreurs propre
+thiserror = "1.0"
+
+# (Optionnel mais utile si tu veux slugifier les titres)
+regex = "1.10"
+
+# (Optionnel pour gérer un dossier config user-friendly)
+directories = "5.0"
+
+[dev-dependencies]
+
+# Tests CLI en boîte noire
+assert_cmd = "2.0"
+predicates = "3.1"
