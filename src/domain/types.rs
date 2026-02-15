@@ -1,4 +1,4 @@
-enum StoryType {
+pub enum StoryType {
     Bugfix,
     Feature,
     Hotfix,
@@ -7,7 +7,7 @@ enum StoryType {
     Test,
 }
 
-enum CommitType {
+pub enum CommitType {
     Feat,
     Fix,
     Refactor,
