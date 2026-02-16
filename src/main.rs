@@ -7,7 +7,7 @@ mod config;
 
 use crate::config::app_config::{ load_or_init_config};
 use dialoguer::{Input, Select};
-use crate::domain::types::{CommitType, StoryType};
+use crate::domain::types::{CommitType, StoryType, WorkItemInput};
 
 fn main() {
 
@@ -28,11 +28,12 @@ fn main() {
 
     println!("Config file read successfully. Team: {}", config.team);
 
-    let input_pi: u32 = Input::new().with_prompt("Pi number:").interact_text().unwrap();
-    println!("Pi number is {input_pi}");
+    let pi: u32 = Input::new().with_prompt("Pi number:").interact_text().unwrap();
+    
+    println!("Pi number is {pi}");
 
-    let it_input: u32 = Input::new().with_prompt("IT number:").interact_text().unwrap();
-    println!("IT number is {it_input}");
+    let it: u32 = Input::new().with_prompt("IT number:").interact_text().unwrap();
+    println!("IT number is {it}");
 
     let story_type_choices_index = Select::new().with_prompt("Select story type:").items(&story_type_choices).default(0).interact().unwrap();
 
@@ -62,11 +63,39 @@ fn main() {
     };
 
     let story_number: String = Input::new().with_prompt("Story number (S-00000 or D-00000):").validate_with(|input:&String| {
-        //todo
-    }).interact_text()
+        let chars: Vec<char> = input.chars().collect();
+        if chars.len() != 7 {
+            return Err(String::from("Story number should be 7 chars"));
+        }
+
+        if chars[0] != 'S' && chars[0] != 'D'  {
+            return Err(String::from("Story number must begin with S (Story) or D (Defect)"));
+        }
+
+        if chars[1] != '-' {
+            return Err(String::from("Missing '-' in after S or D"));
+        }
+
+        if !chars[2..].iter().all(|c| c.is_ascii_digit()) {
+            return Err(String::from("Last 5 characters must be digits"));
+        }
+        Ok(())
+    })
+        .interact_text()
         .unwrap();
     println!("Story number is {story_number}");
 
     let story_title: String = Input::new().with_prompt("Story title:").interact_text().unwrap();
     println!("Story title is {story_title}");
+    
+    let workItem = WorkItemInput {
+        pi,
+        it,
+        story_type,
+        commit_type,
+        story_number,
+        story_title,
+    };
+    
+    println!("WorkItem input:{:?}",workItem);
 }

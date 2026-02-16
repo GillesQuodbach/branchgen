@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum StoryType {
     Bugfix,
     Feature,
@@ -7,6 +8,7 @@ pub enum StoryType {
     Test,
 }
 
+#[derive(Debug)]
 pub enum CommitType {
     Feat,
     Fix,
@@ -19,13 +21,14 @@ pub enum CommitType {
     Ops,
 }
 
-struct WorkItemInput {
-    pi: u32,
-    it: u32,
-    story_type: StoryType,
-    commit_type: CommitType,
-    story_number: String,
-    story_title: String,
+#[derive(Debug)]
+pub struct WorkItemInput {
+    pub pi: u32,
+    pub it: u32,
+    pub story_type: StoryType,
+    pub commit_type: CommitType,
+    pub story_number: String,
+    pub story_title: String,
 }
 
 struct GeneratedOutput {
