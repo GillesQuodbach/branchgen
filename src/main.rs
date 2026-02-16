@@ -29,7 +29,7 @@ fn main() {
     println!("Config file read successfully. Team: {}", config.team);
 
     let pi: u32 = Input::new().with_prompt("Pi number:").interact_text().unwrap();
-    
+
     println!("Pi number is {pi}");
 
     let it: u32 = Input::new().with_prompt("IT number:").interact_text().unwrap();
@@ -87,8 +87,8 @@ fn main() {
 
     let story_title: String = Input::new().with_prompt("Story title:").interact_text().unwrap();
     println!("Story title is {story_title}");
-    
-    let workItem = WorkItemInput {
+
+    let work_item = WorkItemInput {
         pi,
         it,
         story_type,
@@ -96,6 +96,6 @@ fn main() {
         story_number,
         story_title,
     };
-    
-    println!("WorkItem input:{:?}",workItem);
+
+    println!("WorkItem input:{:?}",work_item);
 }
