@@ -1,4 +1,5 @@
 use std::fmt;
+use crate::config::app_config::AppConfig;
 
 #[derive(Debug)]
 pub enum StoryType {
@@ -59,8 +60,8 @@ impl WorkItemInput {
         }
     }
 
-    pub fn create_branch(&self) -> String {
-        format!("{}-{}", self.story_title, self.story_number)
+    pub fn create_branch(&self, team: &str) -> String {
+        format!("{}/{}-{}_{}_{}_{}", self.story_title, self.pi, self.it, team, self.story_number, self.story_title)
     }
 }
 

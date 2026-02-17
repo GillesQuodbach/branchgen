@@ -62,11 +62,17 @@ fn main() {
         _ => unreachable!(),
     };
 
-    let story_number: String = Input::new().with_prompt("Story number (S-00000 or D-00000):").validate_with(|input:&String| {
-        let chars: Vec<char> = input.chars().collect();
-        if chars.len() != 8 {
+    let story_number: String = Input::<String>::new().with_prompt("Story number:").validate_with(|input: &String| {
+
+        let normalized_input = input.trim().to_lowercase();
+
+        if normalized_input.len() != 8 {
             return Err(String::from("Story number should be 8 chars"));
         }
+
+        let mut chars: Vec<char> = normalized_input.chars().collect();
+        // normalisation du premier chars
+        chars[0] = chars[0].to_ascii_lowercase();
 
         if chars[0] != 's' && chars[0] != 'd'  {
             return Err(String::from("Story number must begin with s (story) or d (defect)"));
@@ -79,10 +85,10 @@ fn main() {
         if !chars[2..].iter().all(|c| c.is_ascii_digit()) {
             return Err(String::from("Last 6 characters must be digits"));
         }
+
         Ok(())
-    })
-        .interact_text()
-        .unwrap();
+    }).interact_text().unwrap();
+    
     println!("Story number is {story_number}");
 
     let story_title: String = Input::new().with_prompt("Story title:").interact_text().unwrap();
@@ -98,4 +104,7 @@ fn main() {
         );
 
     println!("WorkItem input:{:?}",work_item);
+
+    let branch = work_item.create_branch(&config.team);
+    println!("WorkItem created:{:?}",branch);
 }
