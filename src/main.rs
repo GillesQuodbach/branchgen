@@ -64,20 +64,20 @@ fn main() {
 
     let story_number: String = Input::new().with_prompt("Story number (S-00000 or D-00000):").validate_with(|input:&String| {
         let chars: Vec<char> = input.chars().collect();
-        if chars.len() != 7 {
-            return Err(String::from("Story number should be 7 chars"));
+        if chars.len() != 8 {
+            return Err(String::from("Story number should be 8 chars"));
         }
 
-        if chars[0] != 'S' && chars[0] != 'D'  {
-            return Err(String::from("Story number must begin with S (Story) or D (Defect)"));
+        if chars[0] != 's' && chars[0] != 'd'  {
+            return Err(String::from("Story number must begin with s (story) or d (defect)"));
         }
 
         if chars[1] != '-' {
-            return Err(String::from("Missing '-' in after S or D"));
+            return Err(String::from("Missing '-' in after s or d"));
         }
 
         if !chars[2..].iter().all(|c| c.is_ascii_digit()) {
-            return Err(String::from("Last 5 characters must be digits"));
+            return Err(String::from("Last 6 characters must be digits"));
         }
         Ok(())
     })
@@ -88,14 +88,14 @@ fn main() {
     let story_title: String = Input::new().with_prompt("Story title:").interact_text().unwrap();
     println!("Story title is {story_title}");
 
-    let work_item = WorkItemInput {
+    let work_item = WorkItemInput::new(
         pi,
         it,
         story_type,
         commit_type,
         story_number,
         story_title,
-    };
+        );
 
     println!("WorkItem input:{:?}",work_item);
 }
