@@ -7,7 +7,7 @@ mod config;
 
 use crate::config::app_config::{ load_or_init_config};
 use dialoguer::{Input, Select};
-use crate::domain::types::{CommitType, StoryType, WorkItemInput};
+use crate::domain::types::{CommitType, StoryType, WorkItemInput, GeneratedOutput};
 
 fn main() {
 
@@ -93,6 +93,9 @@ fn main() {
 
     let story_title: String = Input::new().with_prompt("Story title:").interact_text().unwrap();
     println!("Story title is {story_title}");
+    let formated_story_title = WorkItemInput::format_story_title(&story_title);
+
+    let commit_message: String = Input::new().with_prompt("Commit message:").interact_text().unwrap();
 
     let work_item = WorkItemInput::new(
         pi,
@@ -100,11 +103,19 @@ fn main() {
         story_type,
         commit_type,
         story_number,
-        story_title,
+        formated_story_title,
+        commit_message,
         );
-
     println!("WorkItem input:{:?}",work_item);
 
-    let branch = work_item.create_branch(&config.team);
+
+    let branch = work_item.create_branch_name(&config.team);
     println!("WorkItem created:{:?}",branch);
+
+    let checkout_cmd = GeneratedOutput::format_checkout_cmd(&branch);
+    println!("Checkout command:{:?}",checkout_cmd);
+
+    let commit_name = WorkItemInput::create_commit_name(&work_item, &config.team);
+    println!("WorkItem created:{:?}",commit_name);
+
 }
