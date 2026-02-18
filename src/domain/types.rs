@@ -1,5 +1,4 @@
 use std::fmt;
-use crate::config::app_config::AppConfig;
 
 #[derive(Debug)]
 pub enum StoryType {
@@ -38,6 +37,23 @@ pub enum CommitType {
     Ops,
 }
 
+impl fmt::Display for CommitType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            CommitType::Feat => "feat",
+            CommitType::Fix => "fix",
+            CommitType::Refactor => "refactor",
+            CommitType::Perf => "perf",
+            CommitType::Style => "style",
+            CommitType::Test => "test",
+            CommitType::Docs => "docs",
+            CommitType::Build => "build",
+            CommitType::Ops => "ops",
+        };
+        write!(f, "{s}")
+    }
+}
+
 #[derive(Debug)]
 pub struct WorkItemInput {
     pi: u32,
@@ -71,10 +87,14 @@ impl WorkItemInput {
     }
 
     pub fn create_commit_name(&self, team: &str) -> String {
-        format!("{} [{}-{}] #{} - {}: {}",team, self.pi, self.it, self.story_number, self.story_type, self.commit_message)
+        format!("{} [{}-{}] #{} - {}: {}",team, self.pi, self.it, self.story_number, self.commit_type, self.commit_message)
+    }
+
+    pub fn create_pr_name(&self, team: &str) -> String {
+        format!("{}: {}/{}-{}_{}_{}_{}", self.commit_type, self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
     }
 }
-
+#[derive(Debug)]
 pub struct GeneratedOutput {
     checkout_cmd: String,
     branch_name: String,
@@ -83,7 +103,7 @@ pub struct GeneratedOutput {
 }
 
 impl GeneratedOutput {
-    fn new(checkout_cmd: String, branch_name: String, commit_msg: String, pr_title: String) -> Self {
+    pub fn new(checkout_cmd: String, branch_name: String, commit_msg: String, pr_title: String) -> Self {
         Self {
             checkout_cmd,
             branch_name,

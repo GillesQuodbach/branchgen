@@ -117,5 +117,15 @@ fn main() {
 
     let commit_name = WorkItemInput::create_commit_name(&work_item, &config.team);
     println!("WorkItem created:{:?}",commit_name);
+    
+    let pr_name = WorkItemInput::create_pr_name(&work_item, &config.team);
+    
+    let output = GeneratedOutput::new(
+        checkout_cmd,
+        branch,
+        commit_name,
+        pr_name,
+    );
+    println!("Output:{:?}",output);
 
 }
