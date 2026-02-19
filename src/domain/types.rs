@@ -1,8 +1,9 @@
 use std::fmt;
 use chrono::{Local};
 use uuid::Uuid;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug)]
+#[derive(Debug,Serialize, Deserialize)]
 pub enum StoryType {
     Bugfix,
     Feature,
@@ -26,7 +27,7 @@ impl fmt::Display for StoryType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Serialize, Deserialize)]
 pub enum CommitType {
     Feat,
     Fix,
@@ -56,7 +57,7 @@ impl fmt::Display for CommitType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Serialize, Deserialize)]
 pub struct WorkItemInput {
     pi: u32,
     it: u32,
@@ -96,7 +97,7 @@ impl WorkItemInput {
         format!("{}: {}/{}-{}_{}_{}_{}", self.commit_type, self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
     }
 }
-#[derive(Debug)]
+#[derive(Debug,Serialize, Deserialize)]
 pub struct GeneratedOutput {
     checkout_cmd: String,
     branch_name: String,
@@ -119,7 +120,7 @@ impl GeneratedOutput {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Serialize, Deserialize)]
 pub struct HistoryItem {
     id: Uuid,
     created_at: String,
@@ -145,13 +146,18 @@ impl HistoryItem {
     }
 }
 
-struct HistoryFile {
+#[derive(Debug,Serialize, Deserialize)]
+pub struct HistoryFile {
     version: u32,
     items: Vec<HistoryItem>,
 }
 
 impl HistoryFile {
-    fn new(version: u32, items: Vec<HistoryItem>) -> Self {
+    pub fn new(version: u32, items: Vec<HistoryItem>) -> Self {
         Self { version, items }
+    }
+    
+    pub fn push_item(&mut self, item: HistoryItem) {
+        self.items.push(item);
     }
 }

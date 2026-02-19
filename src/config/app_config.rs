@@ -67,7 +67,7 @@ pub fn create_config_file(team: String) -> Result<AppConfig, String> {
 
     let json = serde_json::to_string_pretty(&config).map_err(|e| format!("Unable to serialize config: {}", e))?;
 
-    std::fs::write(config_file_path, json).map_err(|e| format!("Unable to write config file: {}", e))?;
+    fs::write(config_file_path, json).map_err(|e| format!("Unable to write config file: {}", e))?;
 
     Ok(config)
 }
