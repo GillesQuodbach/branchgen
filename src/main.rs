@@ -7,7 +7,7 @@ mod config;
 
 use crate::config::app_config::{ load_or_init_config};
 use dialoguer::{Input, Select};
-use crate::domain::types::{CommitType, StoryType, WorkItemInput, GeneratedOutput};
+use crate::domain::types::{CommitType, StoryType, WorkItemInput, GeneratedOutput, HistoryItem};
 
 fn main() {
 
@@ -124,5 +124,8 @@ fn main() {
         pr,
     );
     println!("Output:{:?}",output);
+    
+    let history_item = HistoryItem::new(config.team, work_item, output);
+    println!("History item:{:?}",history_item);
 
 }

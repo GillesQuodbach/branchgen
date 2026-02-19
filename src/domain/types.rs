@@ -1,6 +1,6 @@
 use std::fmt;
-use std::time::Instant;
-use chrono::{Local, TimeZone};
+use chrono::{Local};
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub enum StoryType {
@@ -119,8 +119,9 @@ impl GeneratedOutput {
     }
 }
 
-struct HistoryItem {
-    id: String,
+#[derive(Debug)]
+pub struct HistoryItem {
+    id: Uuid,
     created_at: String,
     team: String,
     input: WorkItemInput,
@@ -128,7 +129,9 @@ struct HistoryItem {
 }
 
 impl HistoryItem {
-    fn new(id: String, team: String, input: WorkItemInput, output: GeneratedOutput) -> Self {
+    pub fn new(team: String, input: WorkItemInput, output: GeneratedOutput) -> Self {
+
+        let id = Uuid::new_v4();
 
         let created_at = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
 
