@@ -69,10 +69,7 @@ fn main() {
         if normalized_input.len() != 8 {
             return Err(String::from("Story number should be 8 chars"));
         }
-
-        let mut chars: Vec<char> = normalized_input.chars().collect();
-        // normalisation du premier chars
-        chars[0] = chars[0].to_ascii_lowercase();
+        let chars: Vec<char> = normalized_input.chars().collect();
 
         if chars[0] != 's' && chars[0] != 'd'  {
             return Err(String::from("Story number must begin with s (story) or d (defect)"));
@@ -87,7 +84,7 @@ fn main() {
         }
 
         Ok(())
-    }).interact_text().unwrap();
+    }).interact_text().unwrap().trim().to_lowercase();
     
     println!("Story number is {story_number}");
 
@@ -109,22 +106,22 @@ fn main() {
     println!("WorkItem input:{:?}",work_item);
 
 
-    let branch = work_item.create_branch_name(&config.team);
+    let branch = work_item.branch_name(&config.team);
     println!("WorkItem created:{:?}",branch);
 
     let checkout_cmd = GeneratedOutput::format_checkout_cmd(&branch);
     println!("Checkout command:{:?}",checkout_cmd);
 
-    let commit_name = WorkItemInput::create_commit_name(&work_item, &config.team);
-    println!("WorkItem created:{:?}",commit_name);
+    let commit = work_item.commit_name(&config.team);
+    println!("WorkItem created:{:?}", commit);
     
-    let pr_name = WorkItemInput::create_pr_name(&work_item, &config.team);
+    let pr = work_item.pr_name(&config.team);
     
     let output = GeneratedOutput::new(
         checkout_cmd,
         branch,
-        commit_name,
-        pr_name,
+        commit,
+        pr,
     );
     println!("Output:{:?}",output);
 

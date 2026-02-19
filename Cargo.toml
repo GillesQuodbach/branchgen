@@ -6,6 +6,8 @@ description = "CLI to generate formatted Git branches, commits and PR titles"
 authors = ["GQUO Team Aspicot"]
 
 [dependencies]
+# date handler
+chrono = "0.4"
 # CLI parsing (arguments + sous-commandes)
 clap = { version = "4.5", features = ["derive"] }
 

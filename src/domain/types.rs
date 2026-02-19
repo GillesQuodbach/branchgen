@@ -1,4 +1,6 @@
 use std::fmt;
+use std::time::Instant;
+use chrono::{Local, TimeZone};
 
 #[derive(Debug)]
 pub enum StoryType {
@@ -78,7 +80,7 @@ impl WorkItemInput {
         }
     }
 
-    pub fn create_branch_name(&self, team: &str) -> String {
+    pub fn branch_name(&self, team: &str) -> String {
         format!("{}/{}-{}_{}_{}_{}", self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
     }
 
@@ -86,11 +88,11 @@ impl WorkItemInput {
         story_title.trim().to_lowercase().split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>().join("-")
     }
 
-    pub fn create_commit_name(&self, team: &str) -> String {
+    pub fn commit_name(&self, team: &str) -> String {
         format!("{} [{}-{}] #{} - {}: {}",team, self.pi, self.it, self.story_number, self.commit_type, self.commit_message)
     }
 
-    pub fn create_pr_name(&self, team: &str) -> String {
+    pub fn pr_name(&self, team: &str) -> String {
         format!("{}: {}/{}-{}_{}_{}_{}", self.commit_type, self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
     }
 }
@@ -112,8 +114,8 @@ impl GeneratedOutput {
         }
     }
 
-    pub fn format_checkout_cmd(checkout_cmd: &str) -> String {
-        format!("git checkout -b {}", checkout_cmd)
+    pub fn format_checkout_cmd(branch_name: &str) -> String {
+        format!("git checkout -b {}", branch_name)
     }
 }
 
@@ -126,7 +128,10 @@ struct HistoryItem {
 }
 
 impl HistoryItem {
-    fn new(id: String, created_at: String, team: String, input: WorkItemInput, output: GeneratedOutput) -> Self {
+    fn new(id: String, team: String, input: WorkItemInput, output: GeneratedOutput) -> Self {
+
+        let created_at = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+
         Self {
             id,
             created_at,
