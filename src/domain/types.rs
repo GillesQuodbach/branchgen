@@ -1,4 +1,5 @@
 use std::fmt;
+use std::fmt::{Display, Formatter};
 use chrono::{Local};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
@@ -13,7 +14,7 @@ pub enum StoryType {
     Test,
 }
 
-impl fmt::Display for StoryType {
+impl Display for StoryType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             StoryType::Bugfix => "bugfix",
@@ -40,7 +41,7 @@ pub enum CommitType {
     Ops,
 }
 
-impl fmt::Display for CommitType {
+impl Display for CommitType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             CommitType::Feat => "feat",
@@ -68,6 +69,18 @@ pub struct WorkItemInput {
     commit_message: String,
 }
 
+impl Display for WorkItemInput {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "PI-{} IT-{} | {} | story #{} | {}",
+               self.pi,
+               self.it,
+               self.story_type,
+               self.story_number,
+               self.story_title,
+        )
+    }
+}
+
 impl WorkItemInput {
     pub fn new(pi: u32, it: u32, story_type: StoryType, commit_type: CommitType, story_number: String, story_title: String, commit_message: String) -> Self {
         Self {
@@ -80,6 +93,7 @@ impl WorkItemInput {
             commit_message,
         }
     }
+
 
     pub fn branch_name(&self, team: &str) -> String {
         format!("{}/{}-{}_{}_{}_{}", self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
@@ -105,6 +119,18 @@ pub struct GeneratedOutput {
     pr_title: String,
 }
 
+impl Display for GeneratedOutput {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "branch: {} | commit: {} | pr: {}",
+            self.branch_name,
+            self.commit_msg,
+            self.pr_title
+        )
+    }
+}
+
 impl GeneratedOutput {
     pub fn new(checkout_cmd: String, branch_name: String, commit_msg: String, pr_title: String) -> Self {
         Self {
@@ -127,6 +153,14 @@ pub struct HistoryItem {
     team: String,
     input: WorkItemInput,
     output: GeneratedOutput,
+}
+
+impl Display for HistoryItem {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        writeln!(f, "[{}] {} | team: {}", self.created_at, self.id, self.team)?;
+        writeln!(f, "Input -> {}", self.input)?;
+        write!(f, "Output -> {}", self.output)
+    }
 }
 
 impl HistoryItem {
@@ -159,5 +193,13 @@ impl HistoryFile {
     
     pub fn push_item(&mut self, item: HistoryItem) {
         self.items.push(item);
+    }
+
+    pub fn version(&self) -> u32 {
+        self.version
+    }
+
+    pub fn items(&self) -> &Vec<HistoryItem> {
+        &self.items
     }
 }

@@ -18,6 +18,7 @@ fn main() {
     println!("Welcome to BranchGen");
     println!("*********************");
 
+
     let config = match load_or_init_config() {
         Ok(config) => config,
         Err(e) => {
@@ -132,5 +133,6 @@ fn main() {
     history.push(history_item);
 
     let history_file = HistoryFile::new(1,history);
+    
 
 }
