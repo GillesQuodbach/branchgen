@@ -6,7 +6,6 @@ use crate::domain::types::{HistoryFile, HistoryItem};
 // recuperation du chemin du fichier
 pub fn get_history_file_path() -> Result<PathBuf,String> {
     let history_file = get_config_dir()?.join("history.json");
-    println!("History file path: {}", history_file.display());
     Ok(history_file)
 }
 
@@ -32,12 +31,14 @@ pub fn load_history_file_from_path(path: &Path) -> Result<HistoryFile,String> {
         return Ok(empty_history());
     }
 
-    let content = fs::read_to_string(&path).map_err(|e| format!("Unable to read history file: {}", e))?;
+    let content = fs::read_to_string(path).map_err(|e| format!("Unable to read history file: {}", e))?;
 
     if content.trim().is_empty() {
         return Ok(empty_history());
     }
-    serde_json::from_str(&content).map_err(|e| format!("Unable to deserialize history file: {}", e))?
+    let history: HistoryFile =serde_json::from_str(&content).map_err(|e| format!("Unable to deserialize history file: {}", e))?;
+
+    Ok(history)
 
 }
 

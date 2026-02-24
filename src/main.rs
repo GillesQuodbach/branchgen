@@ -16,9 +16,9 @@ fn main() {
     let story_type_choices = vec!["Bugfix", "Feature", "Hotfix", "Release", "Support", "Test"];
     let commit_types_choices = vec!["feat", "fix", "refactor", "perf", "style", "test", "docs", "build", "ops"];
 
-    println!("*********************");
-    println!("Welcome to BranchGen");
-    println!("*********************");
+    println!("*************************");
+    println!("Welcome to APS BranchGen");
+    println!("*************************");
 
 
     let config = match load_or_init_config() {
@@ -62,7 +62,7 @@ fn main() {
         _ => unreachable!(),
     };
 
-    let story_number: String = Input::<String>::new().with_prompt("Story number:").validate_with(|input: &String| {
+    let story_number: String = Input::<String>::new().with_prompt("Story number").validate_with(|input: &String| {
 
         let normalized_input = input.trim().to_lowercase();
 
@@ -88,11 +88,11 @@ fn main() {
     
     println!("Story number is {story_number}");
 
-    let story_title: String = Input::new().with_prompt("Story title:").interact_text().unwrap();
+    let story_title: String = Input::new().with_prompt("Story title").interact_text().unwrap();
     println!("Story title is {story_title}");
     let formated_story_title = WorkItemInput::format_story_title(&story_title);
 
-    let commit_message: String = Input::new().with_prompt("Commit message:").interact_text().unwrap();
+    let commit_message: String = Input::new().with_prompt("Commit message").interact_text().unwrap();
 
     let work_item = WorkItemInput::new(
         pi,
