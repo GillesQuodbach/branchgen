@@ -5,10 +5,11 @@ mod storage;
 mod error;
 mod config;
 
-use crate::config::app_config::{ load_or_init_config};
+use crate::config::app_config::{ load_or_init_config, update_pi_it_defaults};
 use dialoguer::{Input, Select};
 use crate::domain::types::{CommitType, StoryType, WorkItemInput, GeneratedOutput, HistoryItem, HistoryFile};
 use crate::storage::json_store::{append_history_item,print_history};
+use crate::ui::prompt::prompt_pi_it;
 
 fn main() {
 
@@ -30,11 +31,8 @@ fn main() {
 
     println!("Config file read successfully. Team: {}", config.team);
 
-    let pi: u32 = Input::new().with_prompt("Pi number:").interact_text().unwrap();
-
-    println!("Pi number is {pi}");
-
-    let it: u32 = Input::new().with_prompt("IT number:").interact_text().unwrap();
+    let (pi, it) = prompt_pi_it(config.default_pi, config.default_it);
+    println!("PI number is {pi}");
     println!("IT number is {it}");
 
     let story_type_choices_index = Select::new().with_prompt("Select story type:").items(&story_type_choices).default(0).interact().unwrap();
@@ -138,5 +136,9 @@ fn main() {
     if let Err(e) = append_history_item(history_item) {
         eprintln!("Failed to save history{}", e);
         return
+    }
+
+    if let Err(e) = update_pi_it_defaults(pi,it) {
+        eprintln!("Failed to update pi it: {}", e);
     }
 }

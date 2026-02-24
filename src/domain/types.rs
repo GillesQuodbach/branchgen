@@ -199,7 +199,7 @@ impl HistoryFile {
         self.version
     }
 
-    pub fn items(&self) -> &Vec<HistoryItem> {
+    pub fn items(&self) -> &[HistoryItem] {
         &self.items
     }
 }

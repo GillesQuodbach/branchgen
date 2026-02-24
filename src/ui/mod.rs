@@ -1,2 +1,2 @@
-mod prompt;
+pub mod prompt;
 mod output;

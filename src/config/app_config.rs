@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use directories::ProjectDirs;
 use std::fs;
 use dialoguer::Input;
@@ -7,6 +7,18 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppConfig {
     pub team: String,
+    pub default_pi: Option<u32>,
+    pub default_it: Option<u32>,
+}
+
+impl AppConfig {
+    pub fn new(team: String) -> Self {
+        Self {
+            team,
+            default_pi: None,
+            default_it: None,
+        }
+    }
 }
 
 // load or create config
@@ -14,7 +26,6 @@ pub fn load_or_init_config() -> Result<AppConfig, String> {
     let config_file_exists = config_file_exists().map_err(|e| format!("Config file exists error: {}", e))?;
 
     if config_file_exists {
-        println!("Config file already exists");
         // read config file
         return Ok(read_config_file()?);
     }
@@ -59,11 +70,24 @@ pub fn config_file_exists() -> Result<bool, String> {
     config_file.try_exists().map_err(|e| format!("Check your configuration file: {}", e))
 }
 
+pub fn save_config_to_path(path: &Path,config: &AppConfig) -> Result<(), String> {
+    let json = serde_json::to_string_pretty(config).map_err(|e| format!("Failed to serialize config: {}", e))?;
+
+    fs::write(path, json).map_err(|e| format!("Failed to write config: {}", e))?;
+
+    Ok(())
+}
+
+pub fn save_config(config: &AppConfig) -> Result<(), String> {
+    let config_file_path = get_config_file_path()?;
+    save_config_to_path(&config_file_path,config)
+}
+
 // creation/ecriture du fichier
 pub fn create_config_file(team: String) -> Result<AppConfig, String> {
     let config_file_path = get_config_file_path()?;
 
-    let config = AppConfig { team };
+    let config = AppConfig::new(team);
 
     let json = serde_json::to_string_pretty(&config).map_err(|e| format!("Unable to serialize config: {}", e))?;
 
@@ -78,3 +102,21 @@ pub fn read_config_file() -> Result<AppConfig, String> {
     let config: AppConfig = serde_json::from_str(&json).map_err(|e| format!("Unable to deserialize config: {}", e))?;
     Ok(config)
 }
+
+pub fn update_pi_it_defaults(pi: u32, it: u32) -> Result<AppConfig, String> {
+    let mut config = load_or_init_config()?;
+    config.default_pi = Some(pi);
+    config.default_it = Some(it);
+
+    save_config(&config)?;
+    Ok(config)
+}
+
+
+
+
+
+
+
+
+
