@@ -8,6 +8,7 @@ mod config;
 use crate::config::app_config::{ load_or_init_config};
 use dialoguer::{Input, Select};
 use crate::domain::types::{CommitType, StoryType, WorkItemInput, GeneratedOutput, HistoryItem, HistoryFile};
+use crate::storage::json_store::{append_history_item,print_history};
 
 fn main() {
 
@@ -117,22 +118,25 @@ fn main() {
     println!("WorkItem created:{:?}", commit);
     
     let pr = work_item.pr_name(&config.team);
-    
+
+    println!("\n================ RESULT ================");
+    println!("Branch     : {}", branch);
+    println!("Checkout   : {}", checkout_cmd);
+    println!("Commit msg : {}", commit);
+    println!("PR title   : {}", pr);
+    println!("========================================\n");
+
     let output = GeneratedOutput::new(
         checkout_cmd,
         branch,
         commit,
         pr,
     );
-    println!("Output:{:?}",output);
     
     let history_item = HistoryItem::new(config.team.clone(), work_item, output);
-    println!("History item:{:?}",history_item);
 
-    let mut history: Vec<HistoryItem> = vec![];
-    history.push(history_item);
-
-    let history_file = HistoryFile::new(1,history);
-    
-
+    if let Err(e) = append_history_item(history_item) {
+        eprintln!("Failed to save history{}", e);
+        return
+    }
 }
