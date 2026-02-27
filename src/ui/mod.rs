@@ -1,2 +1,3 @@
-pub mod prompt;
-mod output;
+pub mod terminal;
+pub mod event;
+pub mod tui;

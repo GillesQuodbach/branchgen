@@ -6,6 +6,9 @@ description = "CLI to generate formatted Git branches, commits and PR titles"
 authors = ["GQUO Team Aspicot"]
 
 [dependencies]
+# ratatui
+ratatui = "0.30.0"
+tui-textarea = "0.7.0"
 #uuid
 uuid = { version = "1", features = ["v4", "serde"] }
 # date handler
@@ -14,10 +17,7 @@ chrono = { version = "0.4", features = ["serde"] }
 clap = { version = "4.5", features = ["derive"] }
 
 # Prompts interactifs (listes, input texte, confirmation)
-dialoguer = "0.11"
-
-# Couleurs terminal
-owo-colors = "4.0"
+# dialoguer = "0.11"
 
 # Sérialisation JSON
 serde = { version = "1.0", features = ["derive"] }
@@ -31,6 +31,8 @@ regex = "1.10"
 
 # (Optionnel pour gérer un dossier config user-friendly)
 directories = "5.0"
+crossterm = "0.29.0"
+color-eyre = "0.6.5"
 
 [dev-dependencies]
 
