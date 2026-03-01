@@ -1,13 +1,13 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-use crate::config::app_config::{get_config_dir};
+// use crate::config::app_config::{get_config_dir};
 use crate::domain::types::{HistoryFile, HistoryItem};
 
 // recuperation du chemin du fichier
-pub fn get_history_file_path() -> Result<PathBuf,String> {
-    let history_file = get_config_dir()?.join("history.json");
-    Ok(history_file)
-}
+// pub fn get_history_file_path() -> Result<PathBuf,String> {
+//     let history_file = get_config_dir()?.join("history.json");
+//     Ok(history_file)
+// }
 
 // creation d' un nouveau fichier
 fn empty_history() -> HistoryFile {
@@ -42,42 +42,42 @@ pub fn load_history_file_from_path(path: &Path) -> Result<HistoryFile,String> {
 
 }
 
-pub fn load_history_file() -> Result<HistoryFile,String> {
-    let path = get_history_file_path()?;
-    load_history_file_from_path(&path)
-}
+// pub fn load_history_file() -> Result<HistoryFile,String> {
+//     let path = get_history_file_path()?;
+//     load_history_file_from_path(&path)
+// }
 
-pub fn append_history_item(history_item: HistoryItem) -> Result<(), String> {
-    let path = get_history_file_path()?;
+// pub fn append_history_item(history_item: HistoryItem) -> Result<(), String> {
+//     let path = get_history_file_path()?;
+//
+//     let mut history = load_history_file()?;
+//     history.push_item(history_item);
+//
+//     save_history_file(&path, &history)
+// }
 
-    let mut history = load_history_file()?;
-    history.push_item(history_item);
-
-    save_history_file(&path, &history)
-}
 
 
-
-pub fn print_history(limit: Option<usize>) -> Result<(), String> {
-    let history = load_history_file()?;
-    let mut items: Vec<&HistoryItem> = history.items().iter().collect();
-
-    if items.is_empty() {
-        println!("No history items found.");
-        return Ok(());
-    }
-    items.reverse();
-
-    if let Some(limit) = limit {
-        items.truncate(limit);
-    }
-
-    println!("History (version {}, {} entries)", history.version(), items.len());
-    println!("===============================================================");
-
-    for (index, item) in items.iter().enumerate() {
-        println!("{}. {}", index + 1, item);
-        println!("===============================================================");
-    }
-    Ok(())
-}
+// pub fn print_history(limit: Option<usize>) -> Result<(), String> {
+//     let history = load_history_file()?;
+//     let mut items: Vec<&HistoryItem> = history.items().iter().collect();
+//
+//     if items.is_empty() {
+//         println!("No history items found.");
+//         return Ok(());
+//     }
+//     items.reverse();
+//
+//     if let Some(limit) = limit {
+//         items.truncate(limit);
+//     }
+//
+//     println!("History (version {}, {} entries)", history.version(), items.len());
+//     println!("===============================================================");
+//
+//     for (index, item) in items.iter().enumerate() {
+//         println!("{}. {}", index + 1, item);
+//         println!("===============================================================");
+//     }
+//     Ok(())
+// }

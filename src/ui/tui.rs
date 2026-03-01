@@ -1,48 +1,53 @@
-use ratatui::{
-    Frame,
-    layout::{Constraint, Direction, Layout},
-    style::Stylize,
-    symbols::border,
-    text::{Line, Text},
-    widgets::{Block, Paragraph},
-};
+use ratatui::{Frame, layout::{Constraint, Direction, Layout}, style::Stylize, symbols::border, text::{Line, Text}, widgets::{Block, Paragraph}, border};
+use ratatui::style::{Color, Style};
 
+use ratatui::text::ToSpan;
+use ratatui::widgets::Widget;
 use crate::app::AppState;
 
 pub fn render(frame: &mut Frame, state: &AppState) {
-    let layout = Layout::default()
+    let area = frame.area();
+
+    // block principale
+    let main_block = Block::bordered().fg(Color::Blue).title(" APS Branch Gen ".to_span().into_centered_line());
+
+    // calcule de la zone
+    let inner_area = main_block.inner(area);
+
+    // on dessine le block
+    main_block.render(area, frame.buffer_mut());
+
+    // decoupe du block princpal
+    let horizontal_chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(
+            [Constraint::Percentage(25),
+            Constraint::Percentage(75),]
+        )
+        .split(inner_area);
+
+    // decoupe colone de droite
+    let right_vertical_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Min(1),
-            Constraint::Length(1),
-        ])
-        .split(frame.area());
+        .constraints([Constraint::Length(4), Constraint::Fill(1)]).split(horizontal_chunks[1]);
 
-    // --- Main panel
-    let title = Line::from(" APS BranchGen ".bold());
-    let instructions = Line::from(vec![
-        " Decrement ".into(),
-        "<Left>".blue().bold(),
-        " Increment ".into(),
-        "<Right>".blue().bold(),
-        " Quit ".into(),
-        "<q>".blue().bold(),
-    ]);
+    // panneau gauche
+    Block::bordered()
+        .title(" Infos ")
+        .border_style(Style::default().fg(Color::Cyan))
+        .render(horizontal_chunks[0], frame.buffer_mut());
 
-    let block = Block::bordered()
-        .title(title.centered())
-        .title_bottom(instructions.centered())
-        .border_set(border::THICK);
+    // panneau git
+    Block::bordered()
+        .title(" GitHub ")
+        .border_style(Style::default().fg(Color::Green))
+        .render(right_vertical_chunks[0], frame.buffer_mut());
 
-    let counter_text = Text::from(vec![Line::from(vec![
-        "Value: ".into(),
-        state.counter.to_string().yellow(),
-    ])]);
+    // panneau history
+    Block::bordered()
+        .title(" History ")
+        .border_style(Style::default().fg(Color::Yellow))
+        .render(right_vertical_chunks[1], frame.buffer_mut());
 
-    let main = Paragraph::new(counter_text).centered().block(block);
-    frame.render_widget(main, layout[0]);
 
-    // --- Footer/status
-    let footer = Paragraph::new(state.status.as_str().dim());
-    frame.render_widget(footer, layout[1]);
 }

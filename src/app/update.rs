@@ -7,11 +7,9 @@ pub fn update(state: &mut AppState, action: Action) {
             state.status = "Bye".to_string();
         }
         Action::Increment => {
-            state.counter = state.counter.saturating_add(1);
             state.status = "Increment".to_string();
         }
         Action::Decrement => {
-            state.counter = state.counter.saturating_sub(1);
             state.status = "Decrement".to_string();
         }
         Action::Tick => {

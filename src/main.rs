@@ -1,19 +1,15 @@
 use std::io;
 
-mod app;
-mod ui;
-mod error;
-
 fn main() -> io::Result<()> {
     app::run()
 }
 
-// mod app;
-// mod domain;
-// mod ui;
-// mod storage;
-// mod error;
-// mod config;
+mod app;
+mod domain;
+mod ui;
+mod storage;
+mod error;
+mod config;
 //
 // use crate::config::app_config::{ load_or_init_config, update_pi_it_defaults};
 // use dialoguer::{Input, Select};

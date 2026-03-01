@@ -1,4 +1,4 @@
-use dialoguer::{Input, Select };
+use tui_textarea::Input;
 
 pub fn prompt_pi_it(default_pi: Option<u32>, default_it: Option<u32>) -> (u32, u32) {
     match (default_pi, default_it) {

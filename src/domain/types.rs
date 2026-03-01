@@ -4,9 +4,10 @@ use chrono::{Local};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug,Serialize, Deserialize)]
+#[derive(Debug,Serialize, Deserialize, Default)]
 pub enum StoryType {
     Bugfix,
+    #[default]
     Feature,
     Hotfix,
     Release,
@@ -28,8 +29,9 @@ impl Display for StoryType {
     }
 }
 
-#[derive(Debug,Serialize, Deserialize)]
+#[derive(Debug,Serialize, Deserialize, Default)]
 pub enum CommitType {
+    #[default]
     Feat,
     Fix,
     Refactor,
@@ -58,15 +60,15 @@ impl Display for CommitType {
     }
 }
 
-#[derive(Debug,Serialize, Deserialize)]
+#[derive(Debug,Serialize, Deserialize, Default)]
 pub struct WorkItemInput {
-    pi: u32,
-    it: u32,
-    story_type: StoryType,
-    commit_type: CommitType,
-    story_number: String,
-    story_title: String,
-    commit_message: String,
+    pub pi: u32,
+    pub it: u32,
+    pub story_type: StoryType,
+    pub commit_type: CommitType,
+    pub story_number: String,
+    pub story_title: String,
+    pub commit_message: String,
 }
 
 impl Display for WorkItemInput {
