@@ -32,10 +32,27 @@ pub fn render(frame: &mut Frame, state: &AppState) {
         .constraints([Constraint::Length(4), Constraint::Fill(1)]).split(horizontal_chunks[1]);
 
     // panneau gauche
-    Block::bordered()
+    let left_main_block = Block::bordered()
         .title(" Infos ")
-        .border_style(Style::default().fg(Color::Cyan))
-        .render(horizontal_chunks[0], frame.buffer_mut());
+        .border_style(Style::default().fg(Color::Cyan));
+
+    let left_main_block_inner = left_main_block.inner(horizontal_chunks[0]);
+
+    left_main_block.render(horizontal_chunks[0], frame.buffer_mut());
+
+    let left_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Length(3),
+            Constraint::Fill(1),
+        ]).split(left_main_block_inner);
+
+
+    Block::bordered()
+        .title(" PI ")
+        .border_style(Style::default().fg(Color::Green))
+        .render(left_chunks[0], frame.buffer_mut());
 
     // panneau git
     Block::bordered()
@@ -48,6 +65,6 @@ pub fn render(frame: &mut Frame, state: &AppState) {
         .title(" History ")
         .border_style(Style::default().fg(Color::Yellow))
         .render(right_vertical_chunks[1], frame.buffer_mut());
-
+    
 
 }
