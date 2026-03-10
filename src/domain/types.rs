@@ -62,8 +62,8 @@ impl Display for CommitType {
 
 #[derive(Debug,Serialize, Deserialize, Default)]
 pub struct WorkItemInput {
-    pub pi: u32,
-    pub it: u32,
+    pub pi: Option<u32>,
+    pub it: Option<u32>,
     pub story_type: StoryType,
     pub commit_type: CommitType,
     pub story_number: String,
@@ -73,21 +73,17 @@ pub struct WorkItemInput {
 
 impl Display for WorkItemInput {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "PI-{} IT-{} | {} | story #{} | {}",
-               self.pi,
-               self.it,
-               self.story_type,
-               self.story_number,
-               self.story_title,
-        )
+        let pi = self.pi.map(|x| format!("PI-{x}")).unwrap_or_else(|| "PI-?".to_string());
+        let it = self.it.map(|x| format!("IT-{x}")).unwrap_or_else(|| "IT-?".to_string());
+
+        write!(f, "{} {} | {} | story #{} | {}", pi,it, self.story_type, self.story_number, self.story_title)
     }
 }
-
 impl WorkItemInput {
     pub fn new(pi: u32, it: u32, story_type: StoryType, commit_type: CommitType, story_number: String, story_title: String, commit_message: String) -> Self {
         Self {
-            pi,
-            it,
+            pi: Some(pi),
+            it: Some(it),
             story_type,
             commit_type,
             story_number,
@@ -96,21 +92,27 @@ impl WorkItemInput {
         }
     }
 
-
-    pub fn branch_name(&self, team: &str) -> String {
-        format!("{}/{}-{}_{}_{}_{}", self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
+// TODO reste a corriger les autres fonctions (passage de u32 a Option<>u32)
+    pub fn branch_name(&self, team: &str) -> Result<String, String> {
+        let pi = self.pi.ok_or("PI is missing")?;
+        let it = self.it.ok_or("IT is missing")?;
+        Ok(format!("{}/{}-{}_{}_{}_{}", self.story_type, pi, it, team, self.story_number, self.story_title))
     }
 
     pub fn format_story_title(story_title: &str) -> String {
         story_title.trim().to_lowercase().split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>().join("-")
     }
 
-    pub fn commit_name(&self, team: &str) -> String {
-        format!("{} [{}-{}] #{} - {}: {}",team, self.pi, self.it, self.story_number, self.commit_type, self.commit_message)
+    pub fn commit_name(&self, team: &str) -> Result<String, String> {
+        let pi = self.pi.ok_or("PI is missing")?;
+        let it = self.it.ok_or("IT is missing")?;
+        Ok(format!("{} [{}-{}] #{} - {}: {}",team, pi, it, self.story_number, self.commit_type, self.commit_message))
     }
 
-    pub fn pr_name(&self, team: &str) -> String {
-        format!("{}: {}/{}-{}_{}_{}_{}", self.commit_type, self.story_type, self.pi, self.it, team, self.story_number, self.story_title)
+    pub fn pr_name(&self, team: &str) -> Result<String, String> {
+        let pi = self.pi.ok_or("PI is missing")?;
+        let it = self.it.ok_or("IT is missing")?;
+        Ok(format!("{}: {}/{}-{}_{}_{}_{}", self.commit_type, self.story_type, pi, it, team, self.story_number, self.story_title))
     }
 }
 #[derive(Debug,Serialize, Deserialize)]

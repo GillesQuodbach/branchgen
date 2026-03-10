@@ -8,8 +8,11 @@ use crate::app::AppState;
 pub fn render(frame: &mut Frame, state: &AppState) {
     let area = frame.area();
 
+    // titre de l'equipe
+    let title = format!(" APS BranchGen - Team {} ", state.team_name);
+
     // block principale
-    let main_block = Block::bordered().fg(Color::Blue).title(" APS Branch Gen ".to_span().into_centered_line());
+    let main_block = Block::bordered().fg(Color::Blue).title(title.to_span().into_centered_line());
 
     // calcule de la zone
     let inner_area = main_block.inner(area);

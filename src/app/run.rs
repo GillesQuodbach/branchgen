@@ -1,11 +1,11 @@
 use std::io;
 
-use crate::app::{update::update, Action, AppState};
+use crate::app::{init::init_app_state, update::update, Action, AppState};
 use crate::ui::{event, terminal, tui};
 
 pub fn run() -> io::Result<()> {
     let mut terminal = terminal::init();
-    let mut state = AppState::new();
+    let mut state = init_app_state()?;
 
     // On restaure toujours le terminal à la fin
     let result = run_loop(&mut terminal, &mut state);
