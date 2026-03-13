@@ -1,4 +1,4 @@
-mod action;
+pub mod action;
 mod state;
 mod update;
 mod run;

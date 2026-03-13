@@ -4,6 +4,7 @@ use ratatui::style::{Color, Style};
 use ratatui::text::ToSpan;
 use ratatui::widgets::Widget;
 use crate::app::AppState;
+use crate::domain::field::Field;
 
 pub fn render(frame: &mut Frame, state: &AppState) {
     let area = frame.area();
@@ -58,49 +59,51 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     // block PI
     let pi_block = Block::bordered()
         .title(" PI ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::Pi));
     let pi_inner = pi_block.inner(left_chunks[0]);
-    pi_block.render(left_chunks[0], frame.buffer_mut());
+
     let pi_text = state.work_item_input.pi.map(|v| format!("{v}")).unwrap_or_else(|| "Not set".to_string());
     Paragraph::new(pi_text).render(pi_inner, frame.buffer_mut());
 
     // block it
     let it_block = Block::bordered()
         .title(" IT ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::It));
     let it_inner = it_block.inner(left_chunks[1]);
-    it_block.render(left_chunks[1], frame.buffer_mut());
+
     let it_text = state.work_item_input.it.map(|v| format!("{v}")).unwrap_or_else(|| "Not set".to_string());
     Paragraph::new(it_text).render(it_inner, frame.buffer_mut());
 
     let story_type_block = Block::bordered()
         .title(" Story type ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::StoryType));
 
     let commit_type_block = Block::bordered()
         .title(" Commit type ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::CommitType));
 
     let story_number_block = Block::bordered()
         .title(" Story number ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::StoryNumber));
 
     let story_title = Block::bordered()
         .title(" Story title ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::StoryTitle));
 
     let commit_message_block = Block::bordered()
         .title(" Commit message ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::CommitMessage));
 
     let github_block = Block::bordered()
         .title(" GitHub ")
-        .border_style(Style::default().fg(Color::Green));
+        .border_style(field_style(state, Field::Github));
 
     let history_block = Block::bordered()
         .title(" History ")
-        .border_style(Style::default().fg(Color::Yellow));
-    
+        .border_style(field_style(state, Field::History));
+
+    pi_block.render(left_chunks[0], frame.buffer_mut());
+    it_block.render(left_chunks[1], frame.buffer_mut());
     story_type_block.render(left_chunks[2], frame.buffer_mut());
     commit_type_block.render(left_chunks[3], frame.buffer_mut());
     story_number_block.render(left_chunks[4], frame.buffer_mut());
@@ -110,4 +113,13 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     history_block.render(right_vertical_chunks[1], frame.buffer_mut());
 
 
+}
+
+// modification du style a la selection
+fn field_style(state: &AppState, field: Field) -> Style {
+    if state.selected_field == field {
+        Style::default().fg(Color::Green)
+    } else {
+        Style::default().fg(Color::White)
+    }
 }

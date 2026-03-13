@@ -1,8 +1,9 @@
 use std::{io, time::Duration};
 
-use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use crossterm::event::{self, Event, KeyEventKind};
 
-use crate::app::Action;
+use crate::app::action::{Action, map_key_to_action};
+
 
 pub fn next_action() -> io::Result<Action> {
     // Tick : l'UI continue de respirer même sans input
@@ -15,13 +16,4 @@ pub fn next_action() -> io::Result<Action> {
         }
     }
     Ok(Action::Tick)
-}
-
-fn map_key_to_action(code: KeyCode) -> Action {
-    match code {
-        KeyCode::Char('q') => Action::Quit,
-        KeyCode::Left => Action::Decrement,
-        KeyCode::Right => Action::Increment,
-        _ => Action::Tick,
-    }
 }
