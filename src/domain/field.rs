@@ -45,4 +45,8 @@ impl Field {
             Field::History => Field::Github,
         }
     }
+
+    pub fn is_editable(&self) -> bool {
+        matches!(self, Field::Pi | Field::It | Field::StoryNumber | Field::StoryTitle | Field::CommitMessage)
+    }
 }
