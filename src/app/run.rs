@@ -19,7 +19,7 @@ fn run_loop(terminal: &mut ratatui::DefaultTerminal, state: &mut AppState) -> io
         terminal.draw(|f| tui::render(f, state))?;
 
         // Lis une action (avec tick)
-        let action: Action = event::next_action()?;
+        let action: Action = event::next_action(state.input_mode)?;
         update(state, action);
     }
     Ok(())

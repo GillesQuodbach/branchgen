@@ -29,6 +29,30 @@ impl Display for StoryType {
     }
 }
 
+impl StoryType {
+    pub fn next(&self) -> Self {
+        match self {
+            StoryType::Bugfix => StoryType::Feature,
+            StoryType::Feature => StoryType::Hotfix,
+            StoryType::Hotfix => StoryType::Release,
+            StoryType::Release => StoryType::Support,
+            StoryType::Support => StoryType::Test,
+            StoryType::Test => StoryType::Bugfix,
+        }
+    }
+
+    pub fn prev(&self) -> Self {
+        match self {
+            StoryType::Bugfix => StoryType::Test,
+            StoryType::Feature => StoryType::Bugfix,
+            StoryType::Hotfix => StoryType::Feature,
+            StoryType::Release => StoryType::Hotfix,
+            StoryType::Support => StoryType::Release,
+            StoryType::Test => StoryType::Support,
+        }
+    }
+}
+
 #[derive(Debug,Serialize, Deserialize, Default)]
 pub enum CommitType {
     #[default]
@@ -60,23 +84,56 @@ impl Display for CommitType {
     }
 }
 
+impl CommitType {
+    pub fn next(&self) -> Self {
+        match self {
+            CommitType::Feat => CommitType::Fix,
+            CommitType::Fix => CommitType::Refactor,
+            CommitType::Refactor => CommitType::Perf,
+            CommitType::Perf => CommitType::Style,
+            CommitType::Style => CommitType::Test,
+            CommitType::Test => CommitType::Docs,
+            CommitType::Docs => CommitType::Build,
+            CommitType::Build => CommitType::Ops,
+            CommitType::Ops => CommitType::Feat,
+        }
+    }
+
+    pub fn prev(&self) -> Self {
+        match self {
+            CommitType::Feat => CommitType::Ops,
+            CommitType::Fix => CommitType::Feat,
+            CommitType::Refactor => CommitType::Fix,
+            CommitType::Perf => CommitType::Refactor,
+            CommitType::Style => CommitType::Perf,
+            CommitType::Test => CommitType::Style,
+            CommitType::Docs => CommitType::Test,
+            CommitType::Build => CommitType::Docs,
+            CommitType::Ops => CommitType::Build,
+        }
+    }
+}
+
 #[derive(Debug,Serialize, Deserialize, Default)]
 pub struct WorkItemInput {
     pub pi: Option<u32>,
     pub it: Option<u32>,
-    pub story_type: StoryType,
-    pub commit_type: CommitType,
-    pub story_number: String,
-    pub story_title: String,
-    pub commit_message: String,
+    pub story_type: Option<StoryType>,
+    pub commit_type: Option<CommitType>,
+    pub story_number: Option<String>,
+    pub story_title: Option<String>,
+    pub commit_message: Option<String>,
 }
 
 impl Display for WorkItemInput {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let pi = self.pi.map(|x| format!("PI-{x}")).unwrap_or_else(|| "PI-?".to_string());
         let it = self.it.map(|x| format!("IT-{x}")).unwrap_or_else(|| "IT-?".to_string());
+        let story_type = self.story_type.as_ref().map(|x| x.to_string()).unwrap_or_else(|| "story-type?".to_string());
+        let story_number = self.story_number.as_deref().unwrap_or("?");
+        let story_title = self.story_title.as_deref().unwrap_or("?");
 
-        write!(f, "{} {} | {} | story #{} | {}", pi,it, self.story_type, self.story_number, self.story_title)
+        write!(f, "{} {} | {} | story #{} | {}", pi,it, story_type, story_number, story_title)
     }
 }
 impl WorkItemInput {
@@ -84,19 +141,21 @@ impl WorkItemInput {
         Self {
             pi: Some(pi),
             it: Some(it),
-            story_type,
-            commit_type,
-            story_number,
-            story_title,
-            commit_message,
+            story_type: Some(story_type),
+            commit_type: Some(commit_type),
+            story_number: Some(story_number),
+            story_title: Some(story_title),
+            commit_message: Some(commit_message),
         }
     }
 
-// TODO reste a corriger les autres fonctions (passage de u32 a Option<>u32)
     pub fn branch_name(&self, team: &str) -> Result<String, String> {
         let pi = self.pi.ok_or("PI is missing")?;
         let it = self.it.ok_or("IT is missing")?;
-        Ok(format!("{}/{}-{}_{}_{}_{}", self.story_type, pi, it, team, self.story_number, self.story_title))
+        let story_type = self.story_type.as_ref().ok_or("Story type is missing")?;
+        let story_number = self.story_number.as_deref().ok_or("Story number is missing")?;
+        let story_title = self.story_type.as_ref().ok_or("Story title is missing")?;
+        Ok(format!("{}/{}-{}_{}_{}_{}", story_type, pi, it, team, story_number, story_title))
     }
 
     pub fn format_story_title(story_title: &str) -> String {
@@ -106,13 +165,68 @@ impl WorkItemInput {
     pub fn commit_name(&self, team: &str) -> Result<String, String> {
         let pi = self.pi.ok_or("PI is missing")?;
         let it = self.it.ok_or("IT is missing")?;
-        Ok(format!("{} [{}-{}] #{} - {}: {}",team, pi, it, self.story_number, self.commit_type, self.commit_message))
+        let story_number = self.story_number.as_deref().ok_or("Story number is missing")?;
+        let commit_type = self.commit_type.as_ref().ok_or("Commit type is missing")?;
+        let commit_message = self.commit_message.as_ref().ok_or("Commit message is missing")?;
+        Ok(format!("{} [{}-{}] #{} - {}: {}",team, pi, it, story_number, commit_type, commit_message))
     }
 
     pub fn pr_name(&self, team: &str) -> Result<String, String> {
         let pi = self.pi.ok_or("PI is missing")?;
         let it = self.it.ok_or("IT is missing")?;
-        Ok(format!("{}: {}/{}-{}_{}_{}_{}", self.commit_type, self.story_type, pi, it, team, self.story_number, self.story_title))
+        let commit_type = self.commit_type.as_ref().ok_or("Commit type is missing")?;
+        let story_type = self.story_type.as_ref().ok_or("Story type is missing")?;
+        let story_number = self.story_number.as_deref().ok_or("Story number is missing")?;
+        let story_title = self.story_title.as_deref().ok_or("Story title is missing")?;
+        Ok(format!("{}: {}/{}-{}_{}_{}_{}", commit_type, story_type, pi, it, team, story_number, story_title))
+    }
+
+    pub fn validate_story_number(value: &str) -> Result<(), String> {
+        let normalized = value.trim().to_lowercase();
+        if normalized.len() != 8 {
+            return Err("Story number should be 8 characters long".to_string());
+        }
+        let chars: Vec<char> = normalized.chars().collect();
+        if chars[0] != 's' && chars[0] != 'd' {
+            return Err("Story number must begin with s (story) or d (defect)".to_string());
+        }
+        if chars[1] != '-' {
+            return Err("Missing '-' after s or d".to_string());
+        }
+        if !chars[2..].iter().all(|c| c.is_ascii_digit()) {
+            return Err("Last 6 characters must be digits".to_string());
+        }
+
+        Ok(())
+    }
+
+    pub fn validate(&self) -> Result<(), String> {
+        if self.pi.is_none() {
+            return Err("Pi is missing".to_string());
+        }
+        if self.it.is_none() {
+            return Err("IT is missing".to_string());
+        }
+        if self.story_type.is_none() {
+            return Err("Story type is missing".to_string());
+        }
+        if self.commit_type.is_none() {
+            return Err("Commit type is missing".to_string());
+        }
+
+        let story_number = self.story_number.as_ref().ok_or("Story number is missing")?;
+        Self::validate_story_number(story_number)?;
+
+        let story_title = self.story_title.as_ref().ok_or("Story title is missing")?;
+        if story_title.trim().is_empty() {
+            return Err("Story title cannot be empty".to_string());
+        }
+        Ok(())
+
+
+
+
+
     }
 }
 #[derive(Debug,Serialize, Deserialize)]

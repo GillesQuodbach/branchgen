@@ -39,7 +39,8 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     // decoupe colone de droite
     let right_vertical_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(6), Constraint::Fill(1)]).split(horizontal_chunks[1]);
+        .constraints([Constraint::Length(6),Constraint::Fill(1), Constraint::Length(9)])
+        .split(horizontal_chunks[1]);
 
     // panneau gauche
     let left_main_block = Block::bordered()
@@ -67,7 +68,7 @@ pub fn render(frame: &mut Frame, state: &AppState) {
         .title(" PI ")
         .border_style(field_style(state, Field::Pi));
     let pi_inner = pi_block.inner(left_chunks[0]);
-    let pi_text = state.work_item_input.pi.map(|v| format!("{v}")).unwrap_or_else(|| "Not set".to_string());
+    let pi_text = state.work_item_input.pi.map(|v| format!("{v}")).unwrap_or_else(|| "".to_string());
     pi_block.render(left_chunks[0], frame.buffer_mut());
     Paragraph::new(pi_text).render(pi_inner, frame.buffer_mut());
 
@@ -76,55 +77,80 @@ pub fn render(frame: &mut Frame, state: &AppState) {
         .title(" IT ")
         .border_style(field_style(state, Field::It));
     let it_inner = it_block.inner(left_chunks[1]);
-
-    let it_text = state.work_item_input.it.map(|v| format!("{v}")).unwrap_or_else(|| "Not set".to_string());
+    let it_text = state.work_item_input.it.map(|v| format!("{v:02}")).unwrap_or_else(|| "".to_string());
     it_block.render(left_chunks[1], frame.buffer_mut());
     Paragraph::new(it_text).render(it_inner, frame.buffer_mut());
 
     let story_type_block = Block::bordered()
         .title(" Story type ")
         .border_style(field_style(state, Field::StoryType));
+    let story_type_inner = story_type_block.inner(left_chunks[2]);
+    let story_type_text = state.work_item_input.story_type.as_ref().map(|v| format!("{v}")).unwrap_or_else(|| "".to_string());
+    story_type_block.render(left_chunks[2], frame.buffer_mut());
+    Paragraph::new(story_type_text).render(story_type_inner, frame.buffer_mut());
+
+
 
     let commit_type_block = Block::bordered()
         .title(" Commit type ")
         .border_style(field_style(state, Field::CommitType));
+    let commit_type_inner = commit_type_block.inner(left_chunks[3]);
+    let commit_type_text = state.work_item_input.commit_type.as_ref().map(|v| format!("{v}")).unwrap_or_else(|| "".to_string());
+    commit_type_block.render(left_chunks[3], frame.buffer_mut());
+    Paragraph::new(commit_type_text).render(commit_type_inner, frame.buffer_mut());
 
     let story_number_block = Block::bordered()
         .title(" Story number ")
         .border_style(field_style(state, Field::StoryNumber));
+    let story_number_inner = story_number_block.inner(left_chunks[4]);
+    let story_number_text = state.work_item_input.story_number.as_deref().unwrap_or("");
+    story_number_block.render(left_chunks[4], frame.buffer_mut());
+    Paragraph::new(story_number_text).render(story_number_inner, frame.buffer_mut());
 
-    let story_title = Block::bordered()
+
+    let story_title_block = Block::bordered()
         .title(" Story title ")
         .border_style(field_style(state, Field::StoryTitle));
+    let story_title_text = state.work_item_input.story_title.as_deref().unwrap_or("");
+    let story_title_inner = story_title_block.inner(left_chunks[5]);
+    story_title_block.render(left_chunks[5], frame.buffer_mut());
+    Paragraph::new(story_title_text).render(story_title_inner, frame.buffer_mut());
+
 
     let commit_message_block = Block::bordered()
         .title(" Commit message ")
         .border_style(field_style(state, Field::CommitMessage));
+    let commit_message_text = state.work_item_input.commit_message.as_deref().unwrap_or("");
+    let commit_message_inner = commit_message_block.inner(left_chunks[6]);
+    commit_message_block.render(left_chunks[6], frame.buffer_mut());
+    Paragraph::new(commit_message_text).render(commit_message_inner, frame.buffer_mut());
 
     let github_block = Block::bordered()
         .title(" GitHub ")
         .border_style(field_style(state, Field::Github));
+    let github_inner = github_block.inner(right_vertical_chunks[0]);
+    github_block.render(right_vertical_chunks[0], frame.buffer_mut());
+
+
 
     let history_block = Block::bordered()
         .title(" History ")
         .border_style(field_style(state, Field::History));
-
-
-
-    story_type_block.render(left_chunks[2], frame.buffer_mut());
-    commit_type_block.render(left_chunks[3], frame.buffer_mut());
-    story_number_block.render(left_chunks[4], frame.buffer_mut());
-    story_title.render(left_chunks[5], frame.buffer_mut());
-    commit_message_block.render(left_chunks[6], frame.buffer_mut());
-    github_block.render(right_vertical_chunks[0], frame.buffer_mut());
+    let history_inner = history_block.inner(right_vertical_chunks[1]);
     history_block.render(right_vertical_chunks[1], frame.buffer_mut());
 
-
+    let error_block = Block::bordered().title(" Error ").border_style(Style::default().fg(Color::Red));
+    let error_inner = error_block.inner(right_vertical_chunks[2]);
+    let error_text = state.error_message.as_deref().unwrap_or("");
+    error_block.render(right_vertical_chunks[2], frame.buffer_mut());
+    Paragraph::new(error_text).render(error_inner, frame.buffer_mut());
 }
 
 // modification du style a la selection
 fn field_style(state: &AppState, field: Field) -> Style {
-    if state.selected_field == field {
+    if state.selected_field == field && state.input_mode == InputMode::Edition {
+        Style::default().fg(Color::Red)
+    } else if state.selected_field == field {
         Style::default().fg(Color::Green)
     } else {
         Style::default().fg(Color::White)

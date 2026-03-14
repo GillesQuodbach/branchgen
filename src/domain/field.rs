@@ -8,7 +8,7 @@ pub enum Field {
     StoryTitle,
     CommitMessage,
     Github,
-    History
+    History,
 }
 
 impl Default for Field {
@@ -47,6 +47,10 @@ impl Field {
     }
 
     pub fn is_editable(&self) -> bool {
-        matches!(self, Field::Pi | Field::It | Field::StoryNumber | Field::StoryTitle | Field::CommitMessage)
+        matches!(self, Field::Pi | Field::StoryNumber | Field::StoryTitle | Field::CommitMessage)
+    }
+
+    pub fn is_selectable(&self) -> bool {
+        matches!(self, Field::It | Field::StoryType | Field::CommitType)
     }
 }

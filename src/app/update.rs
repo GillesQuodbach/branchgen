@@ -18,6 +18,16 @@ pub fn update(state: &mut AppState, action: Action) {
                 Action::MoveDown => {
                     state.selected_field = state.selected_field.next();
                 }
+                Action::MoveLeft => {
+                    if state.selected_field.is_selectable() {
+                        state.select_prev_in_selected()
+                    }
+                }
+                Action::MoveRight => {
+                    if state.selected_field.is_selectable(){
+                        state.select_next_in_selected()
+                    }
+                }
                 Action::Enter => {
                     if state.selected_field.is_editable() {
                         state.input_mode = InputMode::Edition;
@@ -38,6 +48,15 @@ pub fn update(state: &mut AppState, action: Action) {
                 Action::Enter => {
                     state.input_mode = InputMode::Navigation;
                     state.status = "Navigation".to_string();
+
+                    match state.validate_current_field() {
+                        Ok(()) => {
+                            state.error_message = None;
+                        }
+                        Err(err) => {
+                            state.error_message = Some(err);
+                        }
+                    }
                 }
                 Action::ExitEdition => {
                     state.input_mode = InputMode::Navigation;

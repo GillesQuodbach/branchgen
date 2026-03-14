@@ -1,4 +1,5 @@
 use crossterm::event::KeyCode;
+use crate::app::input_mode::InputMode;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Action {
@@ -6,18 +7,21 @@ pub enum Action {
     Tick,
     MoveUp,
     MoveDown,
+    MoveLeft,
+    MoveRight,
     Enter,
     ExitEdition,
-    SubmitEdition,
     Backspace,
     InputCharacter(char),
 }
 
-pub fn map_key_to_action(code: KeyCode) -> Action {
+pub fn map_key_to_action(code: KeyCode, input_mode: InputMode) -> Action {
     match code {
-        KeyCode::Char('q') => Action::Quit,
+        KeyCode::Char('q') if matches!(input_mode, InputMode::Navigation) => Action::Quit,
         KeyCode::Up => Action::MoveUp,
         KeyCode::Down => Action::MoveDown,
+        KeyCode::Left => Action::MoveLeft,
+        KeyCode::Right => Action::MoveRight,
         KeyCode::Enter => Action::Enter,
         KeyCode::Esc => Action::ExitEdition,
         KeyCode::Backspace => Action::Backspace,
