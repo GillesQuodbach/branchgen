@@ -7,6 +7,7 @@ pub enum Field {
     StoryNumber,
     StoryTitle,
     CommitMessage,
+    Validate,
     Github,
     History,
 }
@@ -26,7 +27,8 @@ impl Field {
             Field::CommitType => Field::StoryNumber,
             Field::StoryNumber => Field::StoryTitle,
             Field::StoryTitle => Field::CommitMessage,
-            Field::CommitMessage => Field::Github,
+            Field::CommitMessage => Field::Validate,
+            Field::Validate => Field::Github,
             Field::Github => Field::History,
             Field::History => Field::Pi,
         }
@@ -41,7 +43,8 @@ impl Field {
             Field::StoryNumber => Field::CommitType,
             Field::StoryTitle => Field::StoryNumber,
             Field::CommitMessage => Field::StoryTitle,
-            Field::Github => Field::CommitMessage,
+            Field::Validate => Field::CommitMessage,
+            Field::Github => Field::Validate,
             Field::History => Field::Github,
         }
     }
@@ -52,5 +55,9 @@ impl Field {
 
     pub fn is_selectable(&self) -> bool {
         matches!(self, Field::It | Field::StoryType | Field::CommitType)
+    }
+    
+    pub fn is_validate(&self) -> bool {
+        matches!(self, Field::Validate)
     }
 }

@@ -4,6 +4,7 @@ use crossterm::event::{self, Event, KeyEventKind};
 
 use crate::app::action::{Action, map_key_to_action};
 use crate::app::input_mode::InputMode;
+use crate::domain::field::Field;
 
 pub fn next_action(input_mode: InputMode) -> io::Result<Action> {
     // Tick : l'UI continue de respirer même sans input
@@ -17,3 +18,4 @@ pub fn next_action(input_mode: InputMode) -> io::Result<Action> {
     }
     Ok(Action::Tick)
 }
+

@@ -1,6 +1,20 @@
 use crate::app::{Action, AppState};
 use crate::app::input_mode::InputMode;
+use crate::domain::types::GeneratedOutput;
 
+fn build_generated_output(state: &AppState) -> Result<GeneratedOutput, String> {
+    let branch_name = state.work_item_input.branch_name(&state.team_name)?;
+    let checkout_cmd = GeneratedOutput::format_checkout_cmd(&branch_name);
+    let commit_msg = state.work_item_input.commit_name(&state.team_name)?;
+    let pr_title = state.work_item_input.pr_name(&state.team_name)?;
+
+    Ok(GeneratedOutput::new(
+        checkout_cmd,
+        branch_name,
+        commit_msg,
+        pr_title,
+    ))
+}
 pub fn update(state: &mut AppState, action: Action) {
     match state.input_mode {
         InputMode::Navigation => {
@@ -29,7 +43,31 @@ pub fn update(state: &mut AppState, action: Action) {
                     }
                 }
                 Action::Enter => {
-                    if state.selected_field.is_editable() {
+                    if state.selected_field.is_validate() {
+                        match state.validate_form() {
+                            Ok(()) => {
+                                match build_generated_output(state) {
+                                    Ok(output) => {
+                                        state.generated_output = Some(output);
+                                        state.error_message = None;
+                                        state.status = "Validation successful".to_string();
+                                    }
+                                    Err(err) => {
+                                        state.generated_output = None;
+                                        state.error_message = Some(err);
+                                        state.status = "Validation failed".to_string();
+                                    }
+                                }
+                            }
+                            Err(err) => {
+                                state.generated_output = None;
+                                state.error_message = Some(err);
+                                state.status = "Validation failed".to_string();
+                            }
+                        }
+                    }
+
+                    else if state.selected_field.is_editable() {
                         state.input_mode = InputMode::Edition;
                         state.status = format!("Editing {:?}", state.selected_field);
                     }

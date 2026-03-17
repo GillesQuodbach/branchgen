@@ -1,5 +1,6 @@
+use crossterm::event::Event;
 use crate::app::input_mode::InputMode;
-use crate::domain::types::{CommitType, HistoryItem, StoryType, WorkItemInput};
+use crate::domain::types::{CommitType, GeneratedOutput, HistoryItem, StoryType, WorkItemInput};
 use crate::domain::field::Field;
 
 #[derive(Debug, Default)]
@@ -8,6 +9,7 @@ pub struct AppState {
     pub input_mode: InputMode,
     pub team_name: String,
     pub work_item_input: WorkItemInput,
+    pub generated_output: Option<GeneratedOutput>,
     pub history: Vec<HistoryItem>,
     pub should_quit: bool,
     pub status: String,
@@ -21,6 +23,7 @@ impl AppState {
             input_mode: InputMode::default(),
             team_name,
             work_item_input: WorkItemInput::default(),
+            generated_output: None,
             history,
             should_quit: false,
             status: "Ready".to_string(),
@@ -44,16 +47,6 @@ impl AppState {
                     }
                 }
             }
-            Field::It => {
-                if c.is_ascii_digit() {
-                    let mut value = self.work_item_input.it.map(|v| v.to_string()).unwrap_or_default();
-                    value.push(c);
-
-                    if let Ok(parsed) = value.parse::<u32>() {
-                        self.work_item_input.it = Some(parsed);
-                    }
-                }
-            }
             Field::StoryNumber => {
                 self.work_item_input.story_number.get_or_insert(String::new()).push(c);
             }
@@ -63,7 +56,7 @@ impl AppState {
             Field::CommitMessage => {
                 self.work_item_input.commit_message.get_or_insert(String::new()).push(c);
             }
-            Field::StoryType | Field::CommitType | Field::Github | Field::History => {}
+            Field::It | Field::StoryType | Field::CommitType | Field::Validate | Field::Github | Field::History => {}
         }
     }
 
@@ -76,15 +69,6 @@ impl AppState {
                     self.work_item_input.pi = None;
                 } else if let Ok(parsed) = value.parse::<u32>(){
                     self.work_item_input.pi = Some(parsed);
-                }
-            }
-            Field::It => {
-                let mut value = self.work_item_input.it.map(|v| v.to_string()).unwrap_or_default();
-                value.pop();
-                if value.is_empty(){
-                    self.work_item_input.it = None;
-                } else if let Ok(parsed) = value.parse::<u32>(){
-                    self.work_item_input.it = Some(parsed);
                 }
             }
             Field::StoryNumber => {
@@ -111,7 +95,7 @@ impl AppState {
                     }
                 }
             }
-            Field::StoryType | Field::CommitType | Field::Github | Field::History => {}
+            Field::It | Field::StoryType | Field::CommitType | Field::Validate | Field::Github | Field::History => {}
         }
     }
 
@@ -165,7 +149,7 @@ impl AppState {
                     Ok(())
                 }
             }
-            Field::Github | Field::History => Ok(())
+            Field::Validate | Field::Github | Field::History => Ok(())
         }
     }
 
@@ -237,5 +221,9 @@ impl AppState {
             }
             _ => {}
         }
+    }
+
+    pub fn validate_form(&self) -> Result<(), String> {
+        self.validate_all_fields()
     }
 }

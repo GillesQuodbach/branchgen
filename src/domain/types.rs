@@ -154,8 +154,8 @@ impl WorkItemInput {
         let it = self.it.ok_or("IT is missing")?;
         let story_type = self.story_type.as_ref().ok_or("Story type is missing")?;
         let story_number = self.story_number.as_deref().ok_or("Story number is missing")?;
-        let story_title = self.story_type.as_ref().ok_or("Story title is missing")?;
-        Ok(format!("{}/{}-{}_{}_{}_{}", story_type, pi, it, team, story_number, story_title))
+        let story_title = self.story_title.as_ref().ok_or("Story title is missing")?;
+        Ok(format!("{}/{}-{}_{}_{}_{}", story_type, pi, it, team, story_number, Self::format_story_title(story_title)))
     }
 
     pub fn format_story_title(story_title: &str) -> String {
@@ -231,10 +231,10 @@ impl WorkItemInput {
 }
 #[derive(Debug,Serialize, Deserialize)]
 pub struct GeneratedOutput {
-    checkout_cmd: String,
-    branch_name: String,
-    commit_msg: String,
-    pr_title: String,
+    pub checkout_cmd: String,
+    pub branch_name: String,
+    pub commit_msg: String,
+    pub pr_title: String,
 }
 
 impl Display for GeneratedOutput {
