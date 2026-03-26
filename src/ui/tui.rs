@@ -1,4 +1,4 @@
-use ratatui::{Frame, layout::{Constraint, Direction, Layout}, style::Stylize, symbols::border, text::{Line, Text}, widgets::{Block, Paragraph}, border};
+use ratatui::{Frame, layout::{Constraint, Direction, Layout, Alignment}, style::Stylize, symbols::border, text::{Line, Text}, widgets::{Block, Paragraph}, border};
 use ratatui::style::{Color, Style};
 
 use ratatui::text::ToSpan;
@@ -39,7 +39,7 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     // decoupe colone de droite
     let right_vertical_chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(6),Constraint::Fill(1), Constraint::Length(9)])
+        .constraints([Constraint::Length(6),Constraint::Fill(1), Constraint::Length(3)])
         .split(horizontal_chunks[1]);
 
     // panneau gauche
@@ -54,6 +54,7 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     let left_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
+            Constraint::Length(3),
             Constraint::Length(3),
             Constraint::Length(3),
             Constraint::Length(3),
@@ -124,6 +125,13 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     let commit_message_inner = commit_message_block.inner(left_chunks[6]);
     commit_message_block.render(left_chunks[6], frame.buffer_mut());
     Paragraph::new(commit_message_text).render(commit_message_inner, frame.buffer_mut());
+
+    let validate_block = Block::bordered()
+        .border_style(field_style(state, Field::Validate));
+    let validate_text = "VALIDATE";
+    let validate_inner = validate_block.inner(left_chunks[7]);
+    validate_block.render(left_chunks[7], frame.buffer_mut());
+    Paragraph::new(validate_text).alignment(Alignment::Center).render(validate_inner, frame.buffer_mut());
 
     let github_block = Block::bordered()
         .title(" GitHub ")

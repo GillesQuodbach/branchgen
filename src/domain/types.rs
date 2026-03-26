@@ -188,7 +188,7 @@ impl WorkItemInput {
         }
         let chars: Vec<char> = normalized.chars().collect();
         if chars[0] != 's' && chars[0] != 'd' {
-            return Err("Story number must begin with s (story) or d (defect)".to_string());
+            return Err("Story number must begin with s- (story) or d- (defect)".to_string());
         }
         if chars[1] != '-' {
             return Err("Missing '-' after s or d".to_string());
