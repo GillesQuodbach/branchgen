@@ -11,7 +11,7 @@ use crate::domain::types::{HistoryFile, HistoryItem};
 
 // creation d' un nouveau fichier
 fn empty_history() -> HistoryFile {
-    HistoryFile::new(1,Vec::new())
+    HistoryFile::new(Vec::new())
 }
 
 // sauvegarde de l' historique

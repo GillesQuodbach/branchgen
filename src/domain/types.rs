@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use chrono::{Local};
+use chrono::{DateTime, Local, TimeZone, Utc};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 
@@ -271,16 +271,17 @@ impl GeneratedOutput {
 
 #[derive(Debug,Serialize, Deserialize)]
 pub struct HistoryItem {
-    id: Uuid,
-    created_at: String,
-    team: String,
+    pub id: Uuid,
+    pub created_at: DateTime<Utc>,
+    pub team: String,
     input: WorkItemInput,
-    output: GeneratedOutput,
+    pub output: GeneratedOutput,
 }
 
 impl Display for HistoryItem {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        writeln!(f, "[{}] {} | team: {}", self.created_at, self.id, self.team)?;
+        let local_created_at = self.created_at.with_timezone(&Local);
+        writeln!(f, "[{}] {} | team: {}", local_created_at.format("%Y-%m-%d %H:%M:%S"), self.id, self.team)?;
         writeln!(f, "Input -> {}", self.input)?;
         write!(f, "Output -> {}", self.output)
     }
@@ -291,7 +292,7 @@ impl HistoryItem {
 
         let id = Uuid::new_v4();
 
-        let created_at = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+        let created_at = Utc::now();
 
         Self {
             id,
@@ -310,12 +311,12 @@ pub struct HistoryFile {
 }
 
 impl HistoryFile {
-    pub fn new(version: u32, items: Vec<HistoryItem>) -> Self {
-        Self { version, items }
+    pub fn new(items: Vec<HistoryItem>) -> Self {
+        Self { version: 1, items }
     }
     
     pub fn push_item(&mut self, item: HistoryItem) {
-        self.items.push(item);
+        self.items.insert(0, item);
     }
 
     pub fn version(&self) -> u32 {
