@@ -1,4 +1,3 @@
-use crossterm::event::Event;
 use ratatui::text::Line;
 use crate::app::input_mode::InputMode;
 use crate::domain::types::{CommitType, GeneratedOutput, HistoryItem, StoryType, WorkItemInput};
@@ -228,10 +227,15 @@ impl AppState {
         self.validate_all_fields()
     }
 
-    pub fn github_lines(state: AppState) -> Vec<Line<'static>>{
-        let displayed_checkout_cmd = state.generated_output.unwrap().checkout_cmd;
-        let displayed_branch_name_cmd = state.generated_output.unwrap().branch_name;
-        let displayed_commit_msg_cmd = state.generated_output.unwrap().commit_msg;
-        let displayed_pr_title_cmd = state.generated_output.unwrap().pr_title;
+    pub fn github_lines(&self) -> Vec<Line<'static>>{
+        match &self.generated_output {
+            Some(output) => vec![
+                Line::from(format!("checkout: {}", output.checkout_cmd)),
+                Line::from(format!("branch: {}", output.branch_name)),
+                Line::from(format!("commit: {}", output.commit_msg)),
+                Line::from(format!("pr: {}", output.pr_title)),
+            ],
+            None => vec![Line::from("No output yet")]
+        }
     }
 }

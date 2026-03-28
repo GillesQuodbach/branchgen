@@ -139,6 +139,8 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     let github_inner = github_block.inner(right_vertical_chunks[0]);
     github_block.render(right_vertical_chunks[0], frame.buffer_mut());
 
+    Paragraph::new(Text::from(state.github_lines())).render(github_inner, frame.buffer_mut());
+
 
 
     let history_block = Block::bordered()

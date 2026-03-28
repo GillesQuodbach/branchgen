@@ -221,6 +221,11 @@ impl WorkItemInput {
         if story_title.trim().is_empty() {
             return Err("Story title cannot be empty".to_string());
         }
+
+        let commit_message = self.commit_message.as_ref().ok_or("Commit message is missing")?;
+        if commit_message.trim().is_empty() {
+            return Err("Commit message cannot be empty".to_string());
+        }
         Ok(())
 
 
