@@ -1,6 +1,7 @@
+
 use crate::app::{Action, AppState};
 use crate::app::input_mode::InputMode;
-use crate::domain::types::GeneratedOutput;
+use crate::domain::types::{GeneratedOutput, HistoryItem};
 
 fn build_generated_output(state: &AppState) -> Result<GeneratedOutput, String> {
     let branch_name = state.work_item_input.branch_name(&state.team_name)?;
@@ -47,10 +48,17 @@ pub fn update(state: &mut AppState, action: Action) {
                         match state.validate_form() {
                             Ok(()) => {
                                 match build_generated_output(state) {
+
                                     Ok(output) => {
+                                        let history_item = HistoryItem::new(
+                                            state.team_name.clone(),
+                                            state.work_item_input.clone(),
+                                            output.clone(),
+                                        );
                                         state.generated_output = Some(output);
                                         state.error_message = None;
                                         state.status = "Validation successful".to_string();
+                                        state.history.push_item(history_item);
                                     }
                                     Err(err) => {
                                         state.generated_output = None;

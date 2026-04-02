@@ -4,7 +4,7 @@ use chrono::{DateTime, Local, TimeZone, Utc};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug,Serialize, Deserialize, Default)]
+#[derive(Debug,Serialize, Deserialize, Default, Clone)]
 pub enum StoryType {
     Bugfix,
     #[default]
@@ -53,7 +53,7 @@ impl StoryType {
     }
 }
 
-#[derive(Debug,Serialize, Deserialize, Default)]
+#[derive(Debug,Serialize, Deserialize, Default, Clone)]
 pub enum CommitType {
     #[default]
     Feat,
@@ -114,7 +114,7 @@ impl CommitType {
     }
 }
 
-#[derive(Debug,Serialize, Deserialize, Default)]
+#[derive(Debug,Serialize, Deserialize, Default, Clone)]
 pub struct WorkItemInput {
     pub pi: Option<u32>,
     pub it: Option<u32>,
@@ -234,7 +234,7 @@ impl WorkItemInput {
 
     }
 }
-#[derive(Debug,Serialize, Deserialize)]
+#[derive(Debug,Serialize, Deserialize, Clone)]
 pub struct GeneratedOutput {
     pub checkout_cmd: String,
     pub branch_name: String,
@@ -269,7 +269,7 @@ impl GeneratedOutput {
     }
 }
 
-#[derive(Debug,Serialize, Deserialize)]
+#[derive(Debug,Serialize, Deserialize, Clone)]
 pub struct HistoryItem {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
@@ -302,9 +302,10 @@ impl HistoryItem {
             output,
         }
     }
+
 }
 
-#[derive(Debug,Serialize, Deserialize)]
+#[derive(Debug,Serialize, Deserialize, Clone)]
 pub struct HistoryFile {
     version: u32,
     items: Vec<HistoryItem>,
@@ -325,5 +326,15 @@ impl HistoryFile {
 
     pub fn items(&self) -> &[HistoryItem] {
         &self.items
+    }
+
+    pub fn items_mut(&mut self) -> &mut Vec<HistoryItem> {
+        &mut self.items
+    }
+}
+
+impl Default for HistoryFile {
+    fn default() -> Self {
+        Self::new(vec![])
     }
 }
