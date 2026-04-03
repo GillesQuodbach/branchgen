@@ -1,6 +1,6 @@
 
 use crate::app::{Action, AppState};
-use crate::ui::output::build_generated_output;
+use crate::app::generator::build_generated_output;
 use crate::app::validators::{validate_current_field, validate_form};
 use crate::app::editor::{insert_char_in_selected, backspace_in_selected, select_next_in_selected, select_prev_in_selected};
 use crate::app::input_mode::InputMode;
