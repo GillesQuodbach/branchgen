@@ -1,23 +1,11 @@
 
 use crate::app::{Action, AppState};
+use crate::ui::output::build_generated_output;
 use crate::app::validators::{validate_current_field, validate_form};
 use crate::app::editor::{insert_char_in_selected, backspace_in_selected, select_next_in_selected, select_prev_in_selected};
 use crate::app::input_mode::InputMode;
-use crate::domain::types::{GeneratedOutput, HistoryItem};
+use crate::domain::types::{HistoryItem};
 
-fn build_generated_output(state: &AppState) -> Result<GeneratedOutput, String> {
-    let branch_name = state.work_item_input.branch_name(&state.team_name)?;
-    let checkout_cmd = GeneratedOutput::format_checkout_cmd(&branch_name);
-    let commit_msg = state.work_item_input.commit_name(&state.team_name)?;
-    let pr_title = state.work_item_input.pr_name(&state.team_name)?;
-
-    Ok(GeneratedOutput::new(
-        checkout_cmd,
-        branch_name,
-        commit_msg,
-        pr_title,
-    ))
-}
 pub fn update(state: &mut AppState, action: Action) {
     match state.input_mode {
         InputMode::Navigation => {
