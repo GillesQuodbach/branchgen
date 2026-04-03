@@ -1,8 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use crate::config::app_config::get_config_dir;
-// use crate::config::app_config::{get_config_dir};
-use crate::domain::types::{HistoryFile, HistoryItem};
+use crate::domain::types::{HistoryFile};
 
 // recuperation du chemin du fichier
 pub fn get_history_file_path() -> Result<PathBuf,String> {
@@ -10,20 +9,7 @@ pub fn get_history_file_path() -> Result<PathBuf,String> {
     Ok(history_file)
 }
 
-// creation d' un nouveau fichier
-fn empty_history() -> HistoryFile {
-    HistoryFile::new(Vec::new())
-}
-
-// sauvegarde de l' historique
-pub fn save_history_file(path: &Path, history: &HistoryFile) -> Result<(), String> {
-    let json = serde_json::to_string_pretty(history).map_err(|e| format!("Failed to serialize history: {}", e))?;
-
-    fs::write(path, json).map_err(|e| format!("Failed to save history: {}", e))?;
-
-    Ok(())
-}
-
+// charge le fichier d'historique
 pub fn load_history_file_from_path(path: &Path) -> Result<HistoryFile,String> {
 
     let json_exists: bool = path.try_exists().map_err(|e| format!("Unable to check your history file: {}", e))?;
@@ -43,42 +29,17 @@ pub fn load_history_file_from_path(path: &Path) -> Result<HistoryFile,String> {
 
 }
 
-// pub fn load_history_file() -> Result<HistoryFile,String> {
-//     let path = get_history_file_path()?;
-//     load_history_file_from_path(&path)
-// }
+// creation d' un nouveau fichier
+fn empty_history() -> HistoryFile {
+    HistoryFile::new(Vec::new())
+}
 
-// pub fn append_history_item(history_item: HistoryItem) -> Result<(), String> {
-//     let path = get_history_file_path()?;
-//
-//     let mut history = load_history_file()?;
-//     history.push_item(history_item);
-//
-//     save_history_file(&path, &history)
-// }
+// sauvegarde de l' historique
+pub fn save_history_file(path: &Path, history: &HistoryFile) -> Result<(), String> {
+    let json = serde_json::to_string_pretty(history).map_err(|e| format!("Failed to serialize history: {}", e))?;
 
+    fs::write(path, json).map_err(|e| format!("Failed to save history: {}", e))?;
 
+    Ok(())
+}
 
-// pub fn print_history(limit: Option<usize>) -> Result<(), String> {
-//     let history = load_history_file()?;
-//     let mut items: Vec<&HistoryItem> = history.items().iter().collect();
-//
-//     if items.is_empty() {
-//         println!("No history items found.");
-//         return Ok(());
-//     }
-//     items.reverse();
-//
-//     if let Some(limit) = limit {
-//         items.truncate(limit);
-//     }
-//
-//     println!("History (version {}, {} entries)", history.version(), items.len());
-//     println!("===============================================================");
-//
-//     for (index, item) in items.iter().enumerate() {
-//         println!("{}. {}", index + 1, item);
-//         println!("===============================================================");
-//     }
-//     Ok(())
-// }

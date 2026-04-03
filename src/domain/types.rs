@@ -1,6 +1,6 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use chrono::{DateTime, Local, TimeZone, Utc};
+use chrono::{DateTime, Local, Utc};
 use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 
@@ -114,6 +114,7 @@ impl CommitType {
     }
 }
 
+// represente les données du formulaire
 #[derive(Debug,Serialize, Deserialize, Default, Clone)]
 pub struct WorkItemInput {
     pub pi: Option<u32>,

@@ -1,6 +1,7 @@
 use std::io;
 
 fn main() -> io::Result<()> {
+    // appel run
     app::run()
 }
 

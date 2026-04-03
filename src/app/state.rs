@@ -19,6 +19,9 @@ pub struct AppState {
 }
 
 impl AppState {
+    // coeur de l'application
+    // contient tout ce que l'ecran doit afficher et tout ce que l'utilisateur est
+    // entrain de faire
     pub fn new(team_name: String, history: HistoryFile, history_file_path: PathBuf) -> Self {
         Self {
             selected_field: Field::StoryNumber,

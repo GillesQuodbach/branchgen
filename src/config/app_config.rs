@@ -71,19 +71,6 @@ pub fn config_file_exists() -> Result<bool, String> {
     config_file.try_exists().map_err(|e| format!("Check your configuration file: {}", e))
 }
 
-pub fn save_config_to_path(path: &Path,config: &AppConfig) -> Result<(), String> {
-    let json = serde_json::to_string_pretty(config).map_err(|e| format!("Failed to serialize config: {}", e))?;
-
-    fs::write(path, json).map_err(|e| format!("Failed to write config: {}", e))?;
-
-    Ok(())
-}
-
-pub fn save_config(config: &AppConfig) -> Result<(), String> {
-    let config_file_path = get_config_file_path()?;
-    save_config_to_path(&config_file_path,config)
-}
-
 // creation/ecriture du fichier
 pub fn create_config_file(team: String) -> Result<AppConfig, String> {
     let config_file_path = get_config_file_path()?;
@@ -102,6 +89,19 @@ pub fn read_config_file() -> Result<AppConfig, String> {
     let json = fs::read_to_string(config_file_path).map_err(|e| format!("Unable to read config file: {}", e))?;
     let config: AppConfig = serde_json::from_str(&json).map_err(|e| format!("Unable to deserialize config: {}", e))?;
     Ok(config)
+}
+
+pub fn save_config_to_path(path: &Path,config: &AppConfig) -> Result<(), String> {
+    let json = serde_json::to_string_pretty(config).map_err(|e| format!("Failed to serialize config: {}", e))?;
+
+    fs::write(path, json).map_err(|e| format!("Failed to write config: {}", e))?;
+
+    Ok(())
+}
+
+pub fn save_config(config: &AppConfig) -> Result<(), String> {
+    let config_file_path = get_config_file_path()?;
+    save_config_to_path(&config_file_path,config)
 }
 
 pub fn update_pi_it_defaults(pi: u32, it: u32) -> Result<AppConfig, String> {
