@@ -1,4 +1,3 @@
-use crate::app::AppState;
 use crate::domain::types::{GeneratedOutput, WorkItemInput};
 
 pub fn build_generated_output(input: &WorkItemInput, team_name: &str) -> Result<GeneratedOutput, String> {
