@@ -37,7 +37,7 @@ pub fn update(state: &mut AppState, action: Action) {
                     if state.selected_field.is_validate() {
                         match validate_form(&state.work_item_input) {
                             Ok(()) => {
-                                match build_generated_output(state) {
+                                match build_generated_output(&state.work_item_input, &state.team_name) {
 
                                     Ok(output) => {
                                         let history_item = HistoryItem::new(
