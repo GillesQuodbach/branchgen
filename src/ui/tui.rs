@@ -1,9 +1,10 @@
-use ratatui::{Frame, layout::{Constraint, Direction, Layout, Alignment}, style::Stylize, symbols::border, text::{Line, Text}, widgets::{Block, Paragraph}, border};
+use ratatui::{Frame, layout::{Constraint, Direction, Layout, Alignment}, style::Stylize, text::Text, widgets::{Block, Paragraph}};
 use ratatui::style::{Color, Style};
 
 use ratatui::text::ToSpan;
 use ratatui::widgets::Widget;
 use crate::app::AppState;
+use crate::ui::output::github_lines;
 use crate::app::input_mode::InputMode;
 use crate::domain::field::Field;
 
@@ -139,7 +140,7 @@ pub fn render(frame: &mut Frame, state: &AppState) {
     let github_inner = github_block.inner(right_vertical_chunks[0]);
     github_block.render(right_vertical_chunks[0], frame.buffer_mut());
 
-    Paragraph::new(Text::from(state.github_lines())).render(github_inner, frame.buffer_mut());
+    Paragraph::new(Text::from(github_lines(state.generated_output.as_ref()))).render(github_inner, frame.buffer_mut());
 
 
 

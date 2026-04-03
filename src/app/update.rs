@@ -1,5 +1,7 @@
 
 use crate::app::{Action, AppState};
+use crate::app::validators::{validate_current_field, validate_form};
+use crate::app::editor::{insert_char_in_selected, backspace_in_selected, select_next_in_selected, select_prev_in_selected};
 use crate::app::input_mode::InputMode;
 use crate::domain::types::{GeneratedOutput, HistoryItem};
 
@@ -35,17 +37,17 @@ pub fn update(state: &mut AppState, action: Action) {
                 }
                 Action::MoveLeft => {
                     if state.selected_field.is_selectable() {
-                        state.select_prev_in_selected()
+                        select_prev_in_selected(state)
                     }
                 }
                 Action::MoveRight => {
                     if state.selected_field.is_selectable(){
-                        state.select_next_in_selected()
+                        select_next_in_selected(state)
                     }
                 }
                 Action::Enter => {
                     if state.selected_field.is_validate() {
-                        match state.validate_form() {
+                        match validate_form(&state.work_item_input) {
                             Ok(()) => {
                                 match build_generated_output(state) {
 
@@ -95,7 +97,7 @@ pub fn update(state: &mut AppState, action: Action) {
                     state.input_mode = InputMode::Navigation;
                     state.status = "Navigation".to_string();
 
-                    match state.validate_current_field() {
+                    match validate_current_field(state.selected_field, &state.work_item_input) {
                         Ok(()) => {
                             state.error_message = None;
                         }
@@ -109,10 +111,10 @@ pub fn update(state: &mut AppState, action: Action) {
                     state.status = "Navigation".to_string();
                 }
                 Action::Backspace => {
-                    state.backspace_in_selected()
+                    backspace_in_selected(state)
                 }
                 Action::InputCharacter(c) => {
-                    state.insert_char_in_selected(c)
+                    insert_char_in_selected(state, c)
                 }
                 Action::MoveUp | Action::MoveDown => {}
 
