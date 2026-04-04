@@ -4,7 +4,7 @@ use crate::app::generator::build_generated_output;
 use crate::app::validators::{validate_current_field, validate_form};
 use crate::app::editor::{insert_char_in_selected, backspace_in_selected, select_next_in_selected, select_prev_in_selected};
 use crate::app::input_mode::InputMode;
-use crate::domain::types::{HistoryItem};
+use crate::domain::history::{build_history_item};
 
 pub fn update(state: &mut AppState, action: Action) {
     match state.input_mode {
@@ -40,14 +40,12 @@ pub fn update(state: &mut AppState, action: Action) {
                                 match build_generated_output(&state.work_item_input, &state.team_name) {
 
                                     Ok(output) => {
-                                        let history_item = HistoryItem::new(
-                                            state.team_name.clone(),
-                                            state.work_item_input.clone(),
-                                            output.clone(),
-                                        );
+
+                                        let history_item =build_history_item(&state.work_item_input, &output, &state.team_name);
                                         state.generated_output = Some(output);
                                         state.error_message = None;
                                         state.status = "Validation successful".to_string();
+
                                         state.history.push_item(history_item);
                                     }
                                     Err(err) => {
