@@ -4,9 +4,8 @@ use crate::app::generator::build_generated_output;
 use crate::app::validators::{validate_current_field, validate_form};
 use crate::app::editor::{insert_char_in_selected, backspace_in_selected, select_next_in_selected, select_prev_in_selected};
 use crate::app::input_mode::InputMode;
-use crate::config::app_config::get_config_dir;
 use crate::domain::history::{build_history_item};
-use crate::storage::json_store::{get_history_file_path, load_history_file_from_path, save_history_file};
+use crate::storage::json_store::{save_history_file};
 
 pub fn update(state: &mut AppState, action: Action) {
     match state.input_mode {

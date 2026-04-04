@@ -1,5 +1,4 @@
 use ratatui::prelude::Line;
-use crate::app::AppState;
 use crate::domain::types::GeneratedOutput;
 
 pub fn github_lines(generated_output: Option<&GeneratedOutput>) -> Vec<Line<'static>>{
