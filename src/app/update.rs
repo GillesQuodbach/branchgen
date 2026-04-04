@@ -54,6 +54,8 @@ pub fn update(state: &mut AppState, action: Action) {
                                         state.status = "Validation failed".to_string();
                                     }
                                 }
+                                // TODO je sauvegarde dans le state
+                                // TODO j'ecris dans le fichier
                             }
                             Err(err) => {
                                 state.generated_output = None;
