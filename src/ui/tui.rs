@@ -4,7 +4,7 @@ use ratatui::style::{Color, Style};
 use ratatui::text::ToSpan;
 use ratatui::widgets::Widget;
 use crate::app::AppState;
-use crate::ui::output::github_lines;
+use crate::ui::output::{github_lines, history_item_lines};
 use crate::app::input_mode::InputMode;
 use crate::domain::field::Field;
 
@@ -149,6 +149,8 @@ pub fn render(frame: &mut Frame, state: &AppState) {
         .border_style(field_style(state, Field::History));
     let history_inner = history_block.inner(right_vertical_chunks[1]);
     history_block.render(right_vertical_chunks[1], frame.buffer_mut());
+
+    Paragraph::new(Text::from(history_item_lines(state.history.items().first()))).render(history_inner, frame.buffer_mut());
 
     let error_block = Block::bordered().title(" Error ").border_style(Style::default().fg(Color::Red));
     let error_inner = error_block.inner(right_vertical_chunks[2]);
