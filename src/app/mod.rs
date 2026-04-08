@@ -3,7 +3,6 @@ mod state;
 mod update;
 mod run;
 mod init;
-pub mod input_mode;
 mod validators;
 mod editor;
 mod generator;

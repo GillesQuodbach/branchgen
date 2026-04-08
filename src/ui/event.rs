@@ -9,7 +9,7 @@ pub fn next_action() -> io::Result<Action> {
     if event::poll(Duration::from_millis(50))? {
         match event::read()? {
             Event::Key(key) if key.kind == KeyEventKind::Press => {
-                return Ok(map_key_to_action(key.code));
+                return Ok(map_key_to_action(key));
             }
             _ => {}
         }
