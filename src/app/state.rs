@@ -1,14 +1,13 @@
 use std::path::PathBuf;
-use crate::app::input_mode::InputMode;
 use crate::domain::types::{GeneratedOutput, HistoryFile,WorkItemInput};
 use crate::domain::field::Field;
 
 #[derive(Debug, Default)]
 pub struct AppState {
     pub selected_field: Field,
-    pub input_mode: InputMode,
     pub team_name: String,
     pub work_item_input: WorkItemInput,
+    pub text_editors: TextEditors,
     pub generated_output: Option<GeneratedOutput>,
     pub history: HistoryFile,
     pub history_file_path: PathBuf,
@@ -24,9 +23,9 @@ impl AppState {
     pub fn new(team_name: String, history: HistoryFile, history_file_path: PathBuf) -> Self {
         Self {
             selected_field: Field::StoryNumber,
-            input_mode: InputMode::default(),
             team_name,
             work_item_input: WorkItemInput::default(),
+            text_editors: Default::default(),
             generated_output: None,
             history,
             history_file_path,
@@ -35,4 +34,16 @@ impl AppState {
             error_message: None,
         }
     }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct TextEditor {
+    pub cursor: usize,
+}
+#[derive(Debug, Default, Clone)]
+pub struct TextEditors {
+    pub pi: TextEditor,
+    pub story_number: TextEditor,
+    pub story_title: TextEditor,
+    pub commit_message: TextEditor,
 }

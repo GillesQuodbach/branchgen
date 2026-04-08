@@ -8,9 +8,7 @@ use crate::domain::history::{build_history_item};
 use crate::storage::json_store::{save_history_file};
 
 pub fn update(state: &mut AppState, action: Action) {
-    match state.input_mode {
-        InputMode::Navigation => {
-            match action {
+    match action {
                 Action::Quit => {
                     state.should_quit = true;
                     state.status = "Bye".to_string();
@@ -25,13 +23,17 @@ pub fn update(state: &mut AppState, action: Action) {
                     state.selected_field = state.selected_field.next();
                 }
                 Action::MoveLeft => {
-                    if state.selected_field.is_selectable() {
+                    if state.selected_field.is_enum_input() {
                         select_prev_in_selected(state)
+                    } else if state.selected_field.is_text_input() {
+                        // TODO deplacer cursor
                     }
                 }
                 Action::MoveRight => {
-                    if state.selected_field.is_selectable(){
+                    if state.selected_field.is_enum_input(){
                         select_next_in_selected(state)
+                    } else if state.selected_field.is_text_input(){
+                        // TODO deplacer cursor
                     }
                 }
                 Action::Enter => {
@@ -61,8 +63,6 @@ pub fn update(state: &mut AppState, action: Action) {
                                         state.status = "Validation failed".to_string();
                                     }
                                 }
-                                // TODO je sauvegarde dans le state
-                                // TODO j'ecris dans le fichier
                             }
                             Err(err) => {
                                 state.generated_output = None;
@@ -71,51 +71,8 @@ pub fn update(state: &mut AppState, action: Action) {
                             }
                         }
                     }
-
-                    else if state.selected_field.is_editable() {
-                        state.input_mode = InputMode::Edition;
-                        state.status = format!("Editing {:?}", state.selected_field);
-                    }
                 }
-                Action::ExitEdition | Action::Backspace | Action::InputCharacter(_) => {}
+             Action::Backspace | Action::InputCharacter(_) => {}
                 _ => {}
             }
         }
-        InputMode::Edition => {
-            match action {
-                 Action::Quit => {
-                    state.should_quit = true;
-                    state.status = "Bye".to_string();
-                 }
-                Action::Tick => {}
-                Action::Enter => {
-                    state.input_mode = InputMode::Navigation;
-                    state.status = "Navigation".to_string();
-
-                    match validate_current_field(state.selected_field, &state.work_item_input) {
-                        Ok(()) => {
-                            state.error_message = None;
-                        }
-                        Err(err) => {
-                            state.error_message = Some(err);
-                        }
-                    }
-                }
-                Action::ExitEdition => {
-                    state.input_mode = InputMode::Navigation;
-                    state.status = "Navigation".to_string();
-                }
-                Action::Backspace => {
-                    backspace_in_selected(state)
-                }
-                Action::InputCharacter(c) => {
-                    insert_char_in_selected(state, c)
-                }
-                Action::MoveUp | Action::MoveDown => {}
-
-                _ => {}
-            }
-        }
-
-    }
-}

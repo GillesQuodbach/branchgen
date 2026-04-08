@@ -49,11 +49,11 @@ impl Field {
         }
     }
 
-    pub fn is_editable(&self) -> bool {
+    pub fn is_text_input(&self) -> bool {
         matches!(self, Field::Pi | Field::StoryNumber | Field::StoryTitle | Field::CommitMessage)
     }
 
-    pub fn is_selectable(&self) -> bool {
+    pub fn is_enum_input(&self) -> bool {
         matches!(self, Field::It | Field::StoryType | Field::CommitType)
     }
     
