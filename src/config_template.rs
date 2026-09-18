@@ -6,10 +6,9 @@ pub const DEFAULT_CONFIG: &str = r#"
 #                  lowercasefirstletter, uppercasefirstletter
 
 [[fields]]
-key        = "git"
-label      = "Git"
-type       = "select"
-values     = ["ASPICOT"]
+key        = "team"
+label      = "Team"
+type       = "text"
 required   = true
 persistent = true
 
@@ -18,12 +17,15 @@ key      = "pi"
 label    = "PI"
 type     = "number"
 required = true
+persistent = true
 
 [[fields]]
 key      = "it"
 label    = "IT"
-type     = "text"
+type     = "select"
+values = ["01", "02", "03", "04", "05"]
 required = true
+persistent = true
 
 [[fields]]
 key      = "story_type"
@@ -60,7 +62,7 @@ required  = true
 normalize = "spaces"
 
 [formats]
-branch   = "{story_type}/{pi}-{it}_{git}_{story_ref}_{story_title}"
-commit   = "AS [{pi}-{it}] #{story_ref} - {commit_type}: details to update"
-pr_title = "{commit_type}: {pi}-{it}_{git}_{story_ref}_{story_title}"
+branch   = "{story_type}/{pi}-{it}_{team}_{story_ref}_{story_title}"
+commit   = "{team} [{pi}-{it}] #{story_ref} - {commit_type}: details to update"
+pr_title = "{commit_type}: {pi}-{it}_{team}_{story_ref}_{story_title}"
 "#;
