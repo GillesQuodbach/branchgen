@@ -18,12 +18,12 @@ pub fn is_git_repo() -> bool {
 }
 
 pub fn branch_exists(branch_name: &str) -> bool {
-    let output = Command::new("git").args(["branch", "--list"]).output();
-
-    match output {
-        Ok(output) => !String::from_utf8_lossy(&output.stdout).trim().is_empty(),
-        Err(_) => false,
-    }
+    Command::new("git")
+        .args(["show-ref", "--verify", "--quiet"])
+        .arg(format!("refs/heads/{branch_name}"))
+        .status()
+        .map(|status| status.success())
+        .unwrap_or(false)
 }
 
 pub fn checkout_branch(branch_name: &str) -> Result<(), AppError> {
