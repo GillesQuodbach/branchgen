@@ -43,13 +43,31 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
                         .get(&field.key)
                         .cloned()
                         .unwrap_or_default();
-                    Line::from(vec![
+
+                    let mut spans = vec![
                         Span::styled(
                             format!("  {}: ", field.label),
                             Style::default().fg(Theme::TEXT_MUTED),
                         ),
-                        Span::styled(value, Style::default().fg(Theme::GREEN)),
-                    ])
+                    ];
+
+                    if is_active {
+                        let chars: Vec<char> = value.chars().collect();
+                        let cursor = state.form.cursor_position.min(chars.len());
+                        let prefix: String = chars[..cursor].iter().collect();
+                        let suffix: String = chars[cursor..].iter().collect();
+
+                        spans.push(Span::styled(prefix, Style::default().fg(Theme::GREEN)));
+                        spans.push(Span::styled(
+                            "▏",
+                            Style::default().fg(Theme::ACCENT),
+                        ));
+                        spans.push(Span::styled(suffix, Style::default().fg(Theme::GREEN)));
+                    } else {
+                        spans.push(Span::styled(value, Style::default().fg(Theme::GREEN)));
+                    }
+
+                    Line::from(spans)
                 }
             };
 
