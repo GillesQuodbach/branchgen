@@ -32,7 +32,7 @@ pub struct FormatConfig {
     pub pr_title: String,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum FieldType {
     Text,
@@ -40,7 +40,7 @@ pub enum FieldType {
     Number
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum Normalize {
     None,
