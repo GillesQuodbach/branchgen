@@ -75,14 +75,17 @@ impl App {
             terminal.draw(|f| { ui::render(f, &self.state)
             })?;
             if event::poll(Duration::from_millis(100))? {
-            if let Event::Key(key) = crossterm::event::read()? {
-                // Windows envoie Press + Release, on filtre pour n'avoir que Press
-                // sinon bug de navigation
-                if key.kind == KeyEventKind::Press {
-                let action = handle_key(key, &self.state.step);
-                update(&mut self.state, action);
+                match crossterm::event::read()? {
+                    Event::Key(key) if key.kind == KeyEventKind::Press => {
+                        let action = handle_key(key, &self.state);
+                        update(&mut self.state, action);
+                    }
+                    Event::Paste(text) => {
+                        update(&mut self.state, Action::Paste(text));
+                    }
+                    _ => {}
                 }
-            }}
+            }
 
             if self.state.should_quit {
                 break;
@@ -98,28 +101,66 @@ impl App {
 
 }
 
-pub fn handle_key(key: KeyEvent, step: &Step) -> Action {
+pub fn handle_key(key: KeyEvent, state: &AppState) -> Action {
     match key.code {
-        KeyCode::Char('b') if *step == Step::History => Action::CreateBranchFromHistory,
+        KeyCode::Char('b') if state.step == Step::History => Action::CreateBranchFromHistory,
+
         KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => Action::Quit,
-        KeyCode::Char('q')      => Action::Quit,
-        KeyCode::Char('b') if *step == Step::ShowResults        => Action::CreateBranch,
-        KeyCode::Char('c') if *step == Step::ShowResults        => Action::CopyLineFromResults,
-        KeyCode::Char('c') if *step == Step::History            => Action::CopyLineFromHistory,
-        KeyCode::Char('r') if key.modifiers.contains(KeyModifiers::CONTROL)
-        && *step == Step::FillFields
-        => Action::ResetForm,
-        KeyCode::Up             => Action::MoveUp,
-        KeyCode::Down           => Action::MoveDown,
-        KeyCode::Left           => Action::MoveLeft,
-        KeyCode::Right          => Action::MoveRight,
-        KeyCode::Enter          => Action::Enter,
-        KeyCode::Enter if *step == Step::History => Action::CheckoutFromHistory,
-        KeyCode::Backspace      => Action::Backspace,
-        KeyCode::Delete         => Action::Delete,
-        KeyCode::Char(c)   => Action::InputCharacter(c),
-        KeyCode::Tab            => Action::NextTab,
-        KeyCode::BackTab        => Action::PrevTab,
-        _                       => Action::None,
+
+        KeyCode::Char('v') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+            match cli_clipboard::get_contents() {
+                Ok(text) => Action::Paste(text),
+                Err(_) => Action::None,
+            }
+        }
+
+        KeyCode::Char('q') => {
+            if is_editing_text_field(state) {
+                Action::InputCharacter('q')
+            } else {
+                Action::Quit
+            }
+        }
+
+        KeyCode::Char('b') if state.step == Step::ShowResults => Action::CreateBranch,
+        KeyCode::Char('c') if state.step == Step::ShowResults => Action::CopyLineFromResults,
+        KeyCode::Char('c') if state.step == Step::History => Action::CopyLineFromHistory,
+
+        KeyCode::Char('r')
+            if key.modifiers.contains(KeyModifiers::CONTROL)
+                && state.step == Step::FillFields =>
+        {
+            Action::ResetForm
+        }
+
+        KeyCode::Up => Action::MoveUp,
+        KeyCode::Down => Action::MoveDown,
+        KeyCode::Left => Action::MoveLeft,
+        KeyCode::Right => Action::MoveRight,
+
+        KeyCode::Enter if state.step == Step::History => Action::CheckoutFromHistory,
+        KeyCode::Enter => Action::Enter,
+
+        KeyCode::Backspace => Action::Backspace,
+        KeyCode::Delete => Action::Delete,
+
+        KeyCode::Char(c) => Action::InputCharacter(c),
+
+        KeyCode::Tab => Action::NextTab,
+        KeyCode::BackTab => Action::PrevTab,
+
+        _ => Action::None,
     }
+}
+
+fn is_editing_text_field(state: &AppState) -> bool {
+    if state.step != Step::FillFields {
+        return false;
+    }
+
+    state
+        .config
+        .fields
+        .get(state.form.selected_field)
+        .is_some_and(|field| field.field_type == FieldType::Text)
 }
