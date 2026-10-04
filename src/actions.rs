@@ -58,7 +58,7 @@ pub fn update(state: &mut AppState, action: Action) {
                 if state.form.selected_field > 0 {
                     state.form.selected_field -= 1;
                     state.form.cursor_position = 0;
-                    state.form.select_input_position = 0;
+                    sync_select_position(state);
                 }
             }
         },
@@ -79,7 +79,7 @@ pub fn update(state: &mut AppState, action: Action) {
                 if state.form.selected_field < nb_fields {
                     state.form.selected_field += 1;
                     state.form.cursor_position = 0;
-                    state.form.select_input_position = 0;
+                    sync_select_position(state);
                 }
             }
         },
@@ -463,6 +463,29 @@ fn save_persistent_fields(state: &AppState) {
         })
         .collect();
     let _ = save_persistent(&persistent_data);
+}
+
+fn sync_select_position(state: &mut AppState) {
+    let Some(field) = state.config.fields.get(state.form.selected_field) else {
+        return;
+    };
+    if field.field_type != FieldType::Select {
+        state.form.select_input_position = 0;
+        return;
+    }
+    let Some(values) = field.values.as_ref() else {
+        state.form.select_input_position = 0;
+        return;
+    };
+    if values.is_empty() {
+        state.form.select_input_position = 0;
+        return;
+    }
+
+    state.form.select_input_position = state.form.user_inputs
+        .get(&field.key)
+        .and_then(|value| values.iter().position(|item| item == value))
+        .unwrap_or(0);
 }
 
 fn refresh_history_position(state: &mut AppState) {
