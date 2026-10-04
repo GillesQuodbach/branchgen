@@ -236,7 +236,7 @@ pub fn update(state: &mut AppState, action: Action) {
                 } else {
                     state.form.selected_field += 1;
                     state.form.cursor_position = 0;
-                    state.form.select_input_position = 0;
+                    sync_select_position(state);
                 }
             }
             _ => {}
