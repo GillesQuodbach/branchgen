@@ -86,8 +86,8 @@ pub fn update(state: &mut AppState, action: Action) {
 
         Action::MoveLeft => {
             if state.form.selected_field < state.config.fields.len() {
-                let field = &state.config.fields[state.form.selected_field];
-                match field.field_type {
+                let field_type = state.config.fields[state.form.selected_field].field_type.clone();
+                match field_type {
                     FieldType::Select => move_select(state, -1),
                     FieldType::Text | FieldType::Number => {
                         state.form.cursor_position = state.form.cursor_position.saturating_sub(1);
@@ -98,12 +98,15 @@ pub fn update(state: &mut AppState, action: Action) {
 
         Action::MoveRight => {
             if state.form.selected_field < state.config.fields.len() {
-                let field = &state.config.fields[state.form.selected_field];
-                match field.field_type {
+                let (field_type, key) = {
+                    let field = &state.config.fields[state.form.selected_field];
+                    (field.field_type.clone(), field.key.clone())
+                };
+                match field_type {
                     FieldType::Select => move_select(state, 1),
                     FieldType::Text | FieldType::Number => {
                         let len = state.form.user_inputs
-                            .get(&field.key)
+                            .get(&key)
                             .map(|value| value.chars().count())
                             .unwrap_or(0);
                         state.form.cursor_position =
@@ -409,20 +412,23 @@ fn move_select(state: &mut AppState, direction: isize) {
 }
 
 fn insert_text(state: &mut AppState, text: &str) {
-    let Some(field) = current_field(state) else {
-        return;
+    let (field_type, key, persistent) = {
+        let Some(field) = current_field(state) else {
+            return;
+        };
+        (field.field_type.clone(), field.key.clone(), field.persistent)
     };
 
-    match field.field_type {
+    match field_type {
         FieldType::Select => return,
         FieldType::Number => {
             let filtered: String = text.chars().filter(char::is_ascii_digit).collect();
-            insert_at_cursor(state, &field.key, &filtered);
+            insert_at_cursor(state, &key, &filtered);
         }
-        FieldType::Text => insert_at_cursor(state, &field.key, text),
+        FieldType::Text => insert_at_cursor(state, &key, text),
     }
 
-    if field.persistent {
+    if persistent {
         save_persistent_fields(state);
     }
 }
