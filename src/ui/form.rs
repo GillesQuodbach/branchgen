@@ -1,6 +1,7 @@
 
 use crate::config::FieldType;
 use ratatui::Frame;
+use ratatui::layout::Position;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, List, ListItem, Paragraph};
@@ -15,6 +16,8 @@ pub fn render_select_type(frame: &mut Frame, state: &AppState) {
 pub fn render_fields(frame: &mut Frame, state: &AppState) {
     let (tabs_area, content_area, status_area) = base_layout(frame);
     render_tabs(frame, tabs_area, &state.step);
+
+    let mut cursor_position: Option<Position> = None;
 
     let mut items: Vec<ListItem> = state.config.fields
         .iter()
@@ -58,10 +61,12 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
                         let suffix: String = chars[cursor..].iter().collect();
 
                         spans.push(Span::styled(prefix, Style::default().fg(Theme::GREEN)));
-                        spans.push(Span::styled(
-                            "▏",
-                            Style::default().fg(Theme::ACCENT),
-                        ));
+                        let prefix_width = Span::raw(format!("  {}: ", field.label)).width();
+                        let cursor_x = content_area.x + 1 + prefix_width as u16
+                            + chars[..cursor].iter().collect::<String>().width() as u16;
+                        let cursor_y = content_area.y + 1 + i as u16;
+                        cursor_position = Some(Position::new(cursor_x, cursor_y));
+
                         spans.push(Span::styled(suffix, Style::default().fg(Theme::GREEN)));
                     } else {
                         spans.push(Span::styled(value, Style::default().fg(Theme::GREEN)));
@@ -106,6 +111,10 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
 
     let list = List::new(items).block(block);
     frame.render_widget(list, content_area);
+
+    if let Some(position) = cursor_position {
+        frame.set_cursor_position(position);
+    }
 
     let default_status = Paragraph::new(Line::from(vec![
         Span::styled(" ↑↓ ", Style::default().fg(Theme::ACCENT)),
