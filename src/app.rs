@@ -37,15 +37,29 @@ impl App {
                 }
             }
         }
+        let mut form = FormState {
+            user_inputs,
+            selected_field: 0,
+            select_input_position: 0,
+            cursor_position: 0,
+        };
+
+        if let Some(field) = config.fields.first() {
+            if field.field_type == FieldType::Select {
+                if let Some(values) = &field.values {
+                    if let Some(value) = form.user_inputs.get(&field.key) {
+                        if let Some(position) = values.iter().position(|item| item == value) {
+                            form.select_input_position = position;
+                        }
+                    }
+                }
+            }
+        }
+
         App {
             state: AppState {
                 step: Step::FillFields,
-                form: FormState {
-                    user_inputs,
-                    selected_field: 0,
-                    select_input_position: 0,
-                    cursor_position: 0,
-                },
+                form,
                 form_error: None,
                 result: None,
                 config,
