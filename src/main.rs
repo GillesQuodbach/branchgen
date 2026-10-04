@@ -23,6 +23,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     std::env::set_current_dir(&args.path)?;
 
+    if args.init {
+        generate_default_config()?;
+        return Ok(());
+    }
+
     if !git::is_git_repo() {
         eprintln!("Not in a git repository. Please run branchgen from a git repo");
         return Ok(());
@@ -36,11 +41,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
         eprintln!("Panic: {:?}", panic_info);
     }));
-
-    if args.init {
-        generate_default_config()?;
-        return Ok(());
-    }
 
     let config = match load_config() {
         Ok(config) => config,
