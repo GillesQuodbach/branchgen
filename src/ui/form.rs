@@ -63,7 +63,7 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
                         spans.push(Span::styled(prefix, Style::default().fg(Theme::GREEN)));
                         let prefix_width = Span::raw(format!("  {}: ", field.label)).width();
                         let cursor_x = content_area.x + 1 + prefix_width as u16
-                            + chars[..cursor].iter().collect::<String>().width() as u16;
+                            + Span::raw(chars[..cursor].iter().collect::<String>()).width() as u16;
                         let cursor_y = content_area.y + 1 + i as u16;
                         cursor_position = Some(Position::new(cursor_x, cursor_y));
 
