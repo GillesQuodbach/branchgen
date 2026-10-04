@@ -385,12 +385,16 @@ fn current_field(state: &AppState) -> Option<&crate::config::FieldConfig> {
 }
 
 fn move_select(state: &mut AppState, direction: isize) {
-    let Some(field) = current_field(state) else {
+    let Some((key, values, persistent)) = current_field(state).and_then(|field| {
+        Some((
+            field.key.clone(),
+            field.values.clone()?,
+            field.persistent,
+        ))
+    }) else {
         return;
     };
-    let Some(values) = field.values.as_ref() else {
-        return;
-    };
+
     if values.is_empty() {
         return;
     }
@@ -404,9 +408,9 @@ fn move_select(state: &mut AppState, direction: isize) {
     };
 
     state.form.select_input_position = next;
-    state.form.user_inputs.insert(field.key.clone(), values[next].clone());
+    state.form.user_inputs.insert(key, values[next].clone());
 
-    if field.persistent {
+    if persistent {
         save_persistent_fields(state);
     }
 }
@@ -466,14 +470,19 @@ fn save_persistent_fields(state: &AppState) {
 }
 
 fn sync_select_position(state: &mut AppState) {
-    let Some(field) = state.config.fields.get(state.form.selected_field) else {
+    let Some((field_type, key, values)) = state.config.fields
+        .get(state.form.selected_field)
+        .map(|field| (field.field_type, field.key.clone(), field.values.clone()))
+    else {
         return;
     };
-    if field.field_type != FieldType::Select {
+
+    if field_type != FieldType::Select {
         state.form.select_input_position = 0;
         return;
     }
-    let Some(values) = field.values.as_ref() else {
+
+    let Some(values) = values else {
         state.form.select_input_position = 0;
         return;
     };
@@ -482,10 +491,12 @@ fn sync_select_position(state: &mut AppState) {
         return;
     }
 
-    state.form.select_input_position = state.form.user_inputs
-        .get(&field.key)
+    let position = state.form.user_inputs
+        .get(&key)
         .and_then(|value| values.iter().position(|item| item == value))
         .unwrap_or(0);
+
+    state.form.select_input_position = position;
 }
 
 fn refresh_history_position(state: &mut AppState) {
