@@ -20,7 +20,7 @@ pub fn render_history(frame: &mut Frame, state: &AppState) {
             Style::default().fg(Theme::TEXT_MUTED),
         )));
     } else {
-        for (i, item) in history.iter().enumerate() {
+        for (i, item) in history.iter().rev().enumerate() {
             if i > 0 {
                 lines.push(Line::from(Span::styled(
                     "  ─────────────────────────────────────",
