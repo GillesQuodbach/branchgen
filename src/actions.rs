@@ -431,7 +431,7 @@ fn insert_text(state: &mut AppState, text: &str) {
         }
         FieldType::Text => {
             // TUI fields are single-line: normalize pasted line breaks to spaces.
-            let normalized = text.replace("\r\n", " ").replace(['\r', '\n'], " ");
+            let normalized = text.replace("\r\n", " ").replace('\r', " ").replace('\n', " ");
             insert_at_cursor(state, &key, &normalized);
         },
     }
