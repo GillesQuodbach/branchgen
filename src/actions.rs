@@ -292,7 +292,7 @@ pub fn update(state: &mut AppState, action: Action) {
             let entry_index = state.history_selected_line / line_per_entry;
             let line_in_entry = state.history_selected_line % line_per_entry;
 
-            if let Some(entry) = history.get(entry_index) {
+            if let Some(entry) = history.iter().rev().nth(entry_index) {
                 let text = match line_in_entry {
                     0 => entry.date.clone(),
                     1 => entry.branch.clone(),
@@ -343,7 +343,7 @@ pub fn update(state: &mut AppState, action: Action) {
             let line_in_entry = state.history_selected_line % lines_per_entry;
 
             if line_in_entry == 1 {
-                if let Some(entry) = history.get(entry_index) {
+                if let Some(entry) = history.iter().rev().nth(entry_index) {
                     match checkout_branch(&entry.branch) {
                         Ok(_) => set_message(state, format!("✓ Switch to '{}'", entry.branch)),
                         Err(e) => set_message(state, format!("✗ Error: {}", e)),
@@ -365,7 +365,7 @@ pub fn update(state: &mut AppState, action: Action) {
             let line_in_entry = state.history_selected_line % lines_per_entry;
 
             if line_in_entry == 1 {
-                if let Some(entry) = history.get(entry_index) {
+                if let Some(entry) = history.iter().rev().nth(entry_index) {
                     match create_branch(&entry.branch) {
                         Ok(_) => set_message(state, format!("✓ Branch '{}' created", entry.branch)),
                         Err(e) => set_message(state, format!("✗ Error: {}", e)),
@@ -429,7 +429,11 @@ fn insert_text(state: &mut AppState, text: &str) {
             let filtered: String = text.chars().filter(char::is_ascii_digit).collect();
             insert_at_cursor(state, &key, &filtered);
         }
-        FieldType::Text => insert_at_cursor(state, &key, text),
+        FieldType::Text => {
+            // TUI fields are single-line: normalize pasted line breaks to spaces.
+            let normalized = text.replace("\r\n", " ").replace(['\r', '\n'], " ");
+            insert_at_cursor(state, &key, &normalized);
+        },
     }
 
     if persistent {
