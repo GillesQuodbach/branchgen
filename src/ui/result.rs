@@ -1,9 +1,9 @@
+use crate::state::AppState;
+use crate::ui::layout::{Theme, base_layout, render_tabs};
 use ratatui::Frame;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{Block, BorderType, Borders, Paragraph};
-use crate::state::AppState;
-use crate::ui::layout::{base_layout, render_tabs, Theme};
 
 pub fn render_results(frame: &mut Frame, state: &AppState) {
     let (tabs_area, content_area, status_area) = base_layout(frame);
@@ -13,13 +13,19 @@ pub fn render_results(frame: &mut Frame, state: &AppState) {
         .borders(Borders::ALL)
         .border_type(BorderType::Plain)
         .border_style(Style::default().fg(Theme::BORDER))
-        .title(Span::styled(" Results ", Style::default().fg(Theme::ACCENT)))
+        .title(Span::styled(
+            " Results ",
+            Style::default().fg(Theme::ACCENT),
+        ))
         .style(Style::default().bg(Theme::BG));
 
     if let Some(result) = &state.result {
         let line_style = |index: usize, color| {
             if state.result_selected_line == index {
-                Style::default().fg(Theme::BG).bg(color).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(Theme::BG)
+                    .bg(color)
+                    .add_modifier(Modifier::BOLD)
             } else {
                 Style::default().fg(color)
             }
@@ -36,12 +42,11 @@ pub fn render_results(frame: &mut Frame, state: &AppState) {
 
         frame.render_widget(Paragraph::new(text).block(block), content_area);
     } else {
-        let text = Paragraph::new(
-            Span::styled(
-                "  No results yet — fill the form and press Enter.",
-                Style::default().fg(Theme::TEXT_MUTED),
-            )
-        ).block(block);
+        let text = Paragraph::new(Span::styled(
+            "  No results yet — fill the form and press Enter.",
+            Style::default().fg(Theme::TEXT_MUTED),
+        ))
+        .block(block);
         frame.render_widget(text, content_area);
     }
 
@@ -58,13 +63,17 @@ pub fn render_results(frame: &mut Frame, state: &AppState) {
         Span::styled("Copy  ", Style::default().fg(Theme::TEXT_MUTED)),
         Span::styled("q ", Style::default().fg(Theme::ACCENT)),
         Span::styled("Quit", Style::default().fg(Theme::TEXT_MUTED)),
-    ])).style(Style::default().bg(Theme::BG_SURFACE));
+    ]))
+    .style(Style::default().bg(Theme::BG_SURFACE));
 
-    let show_error = state.form_error.is_some()&& state.git_message_time
-        .map(|t| t.elapsed().as_secs() < 2)
-        .unwrap_or(false);
+    let show_error = state.form_error.is_some()
+        && state
+            .git_message_time
+            .map(|t| t.elapsed().as_secs() < 2)
+            .unwrap_or(false);
 
-    let show_message = state.git_message_time
+    let show_message = state
+        .git_message_time
         .map(|t| t.elapsed().as_secs() < 2)
         .unwrap_or(false);
 
@@ -72,12 +81,15 @@ pub fn render_results(frame: &mut Frame, state: &AppState) {
         Paragraph::new(Span::styled(
             format!(" {}", state.form_error.as_deref().unwrap_or("")),
             Style::default().fg(Theme::ERROR),
-        )).style(Style::default().bg(Theme::BG_SURFACE))
+        ))
+        .style(Style::default().bg(Theme::BG_SURFACE))
     } else if show_message {
         match &state.git_message {
-            Some(msg) => Paragraph::new(
-                Span::styled(format!(" {}", msg), Style::default().fg(Theme::GREEN))
-            ).style(Style::default().bg(Theme::BG_SURFACE)),
+            Some(msg) => Paragraph::new(Span::styled(
+                format!(" {}", msg),
+                Style::default().fg(Theme::GREEN),
+            ))
+            .style(Style::default().bg(Theme::BG_SURFACE)),
             None => default_status,
         }
     } else {

@@ -1,12 +1,11 @@
-
 use crate::config::FieldType;
+use crate::state::AppState;
+use crate::ui::layout::{Theme, base_layout, render_tabs};
 use ratatui::Frame;
 use ratatui::layout::Position;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, List, ListItem, Paragraph};
-use crate::state::AppState;
-use crate::ui::layout::{base_layout, render_tabs, Theme};
 
 pub fn render_select_type(frame: &mut Frame, state: &AppState) {
     let (tabs_area, _content_area, _status_area) = base_layout(frame);
@@ -19,7 +18,9 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
 
     let mut cursor_position: Option<Position> = None;
 
-    let mut items: Vec<ListItem> = state.config.fields
+    let mut items: Vec<ListItem> = state
+        .config
+        .fields
         .iter()
         .enumerate()
         .map(|(i, field)| {
@@ -27,7 +28,9 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
 
             let line = match field.field_type {
                 FieldType::Select => {
-                    let value = state.form.user_inputs
+                    let value = state
+                        .form
+                        .user_inputs
                         .get(&field.key)
                         .cloned()
                         .unwrap_or_else(|| field.label.clone());
@@ -42,17 +45,17 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
                     ])
                 }
                 FieldType::Text | FieldType::Number => {
-                    let value = state.form.user_inputs
+                    let value = state
+                        .form
+                        .user_inputs
                         .get(&field.key)
                         .cloned()
                         .unwrap_or_default();
 
-                    let mut spans = vec![
-                        Span::styled(
-                            format!("  {}: ", field.label),
-                            Style::default().fg(Theme::TEXT_MUTED),
-                        ),
-                    ];
+                    let mut spans = vec![Span::styled(
+                        format!("  {}: ", field.label),
+                        Style::default().fg(Theme::TEXT_MUTED),
+                    )];
 
                     if is_active {
                         let chars: Vec<char> = value.chars().collect();
@@ -62,7 +65,9 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
 
                         spans.push(Span::styled(prefix, Style::default().fg(Theme::GREEN)));
                         let prefix_width = Span::raw(format!("  {}: ", field.label)).width();
-                        let cursor_x = content_area.x + 1 + prefix_width as u16
+                        let cursor_x = content_area.x
+                            + 1
+                            + prefix_width as u16
                             + Span::raw(chars[..cursor].iter().collect::<String>()).width() as u16;
                         let cursor_y = content_area.y + 1 + i as u16;
                         cursor_position = Some(Position::new(cursor_x, cursor_y));
@@ -89,18 +94,17 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
         .collect();
 
     let is_validate = state.form.selected_field == state.config.fields.len();
-    items.push(ListItem::new(Line::from(vec![Span::styled(" [ Générer ]",
-                                                          if is_validate {
-                                                              Style::default()
-                                                                  .fg(Theme::BG)
-                                                                  .bg(Theme::ACCENT)
-                                                                  .add_modifier(Modifier::BOLD)
-                                                          } else {
-                                                              Style::default().fg(Theme::ACCENT)
-                                                          }
-
-    )
-    ])));
+    items.push(ListItem::new(Line::from(vec![Span::styled(
+        " [ Générer ]",
+        if is_validate {
+            Style::default()
+                .fg(Theme::BG)
+                .bg(Theme::ACCENT)
+                .add_modifier(Modifier::BOLD)
+        } else {
+            Style::default().fg(Theme::ACCENT)
+        },
+    )])));
 
     let block = Block::default()
         .borders(Borders::ALL)
@@ -131,18 +135,21 @@ pub fn render_fields(frame: &mut Frame, state: &AppState) {
         Span::styled("Reset  ", Style::default().fg(Theme::TEXT_MUTED)),
         Span::styled("q ", Style::default().fg(Theme::ACCENT)),
         Span::styled("Quit", Style::default().fg(Theme::TEXT_MUTED)),
-    ])).style(Style::default().bg(Theme::BG_SURFACE));
+    ]))
+    .style(Style::default().bg(Theme::BG_SURFACE));
 
     let show_error = state.form_error.is_some()
-        && state.git_message_time
-        .map(|t| t.elapsed().as_secs() < 2)
-        .unwrap_or(false);
+        && state
+            .git_message_time
+            .map(|t| t.elapsed().as_secs() < 2)
+            .unwrap_or(false);
 
     let status = if show_error {
         Paragraph::new(Span::styled(
             format!(" {}", state.form_error.as_deref().unwrap_or("")),
             Style::default().fg(Theme::ERROR),
-        )).style(Style::default().bg(Theme::BG_SURFACE))
+        ))
+        .style(Style::default().bg(Theme::BG_SURFACE))
     } else {
         default_status
     };

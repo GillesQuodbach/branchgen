@@ -1,14 +1,17 @@
-use std::io::stdout;
-use std::time::Duration;
 use crate::config::{AppConfig, FieldType};
 use crate::error::AppError;
 use crate::state::{AppState, FormState, Step};
-use crossterm::{event, execute, terminal::{enable_raw_mode, disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use crossterm::{
+    event, execute,
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+};
 use indexmap::IndexMap;
-use ratatui::{Terminal, backend::CrosstermBackend };
+use ratatui::{Terminal, backend::CrosstermBackend};
+use std::io::stdout;
+use std::time::Duration;
 
-use crate::actions::{update, Action};
+use crate::actions::{Action, update};
 use crate::{storage, ui};
 
 pub struct App {
@@ -22,8 +25,8 @@ impl App {
 
         for field in &config.fields {
             if field.field_type == FieldType::Select {
-                if let Some(values) = &field.values{
-                    if let Some(first) = values.first(){
+                if let Some(values) = &field.values {
+                    if let Some(first) = values.first() {
                         user_inputs.insert(field.key.clone(), first.clone());
                     }
                 }
@@ -32,7 +35,7 @@ impl App {
 
         for field in &config.fields {
             if field.persistent {
-                if let Some(value) = persistent_data.get(&field.key){
+                if let Some(value) = persistent_data.get(&field.key) {
                     user_inputs.insert(field.key.clone(), value.clone());
                 }
             }
@@ -70,11 +73,9 @@ impl App {
                 git_message_time: None,
                 result_selected_line: 0,
                 history_selected_line: 0,
-            }
+            },
         }
     }
-
-
 
     pub fn run(&mut self) -> Result<(), AppError> {
         //init
@@ -86,8 +87,7 @@ impl App {
 
         //boucle principale
         loop {
-            terminal.draw(|f| { ui::render(f, &self.state)
-            })?;
+            terminal.draw(|f| ui::render(f, &self.state))?;
             if event::poll(Duration::from_millis(100))? {
                 match crossterm::event::read()? {
                     Event::Key(key) if key.kind == KeyEventKind::Press => {
@@ -111,8 +111,6 @@ impl App {
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
         Ok(())
     }
-
-
 }
 
 pub fn handle_key(key: KeyEvent, state: &AppState) -> Action {
@@ -141,8 +139,7 @@ pub fn handle_key(key: KeyEvent, state: &AppState) -> Action {
         KeyCode::Char('c') if state.step == Step::History => Action::CopyLineFromHistory,
 
         KeyCode::Char('r')
-            if key.modifiers.contains(KeyModifiers::CONTROL)
-                && state.step == Step::FillFields =>
+            if key.modifiers.contains(KeyModifiers::CONTROL) && state.step == Step::FillFields =>
         {
             Action::ResetForm
         }

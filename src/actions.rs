@@ -1,11 +1,11 @@
-use std::time::Instant;
-use chrono::Local;
-use indexmap::IndexMap;
 use crate::config::FieldType;
 use crate::generator::generate_result;
 use crate::git::{checkout_branch, create_branch};
 use crate::state::{AppState, Step};
-use crate::storage::{load_history, save_history, save_persistent, History};
+use crate::storage::{History, load_history, save_history, save_persistent};
+use chrono::Local;
+use indexmap::IndexMap;
+use std::time::Instant;
 
 pub enum Action {
     Quit,
@@ -86,7 +86,9 @@ pub fn update(state: &mut AppState, action: Action) {
 
         Action::MoveLeft => {
             if state.form.selected_field < state.config.fields.len() {
-                let field_type = state.config.fields[state.form.selected_field].field_type.clone();
+                let field_type = state.config.fields[state.form.selected_field]
+                    .field_type
+                    .clone();
                 match field_type {
                     FieldType::Select => move_select(state, -1),
                     FieldType::Text | FieldType::Number => {
@@ -105,12 +107,13 @@ pub fn update(state: &mut AppState, action: Action) {
                 match field_type {
                     FieldType::Select => move_select(state, 1),
                     FieldType::Text | FieldType::Number => {
-                        let len = state.form.user_inputs
+                        let len = state
+                            .form
+                            .user_inputs
                             .get(&key)
                             .map(|value| value.chars().count())
                             .unwrap_or(0);
-                        state.form.cursor_position =
-                            (state.form.cursor_position + 1).min(len);
+                        state.form.cursor_position = (state.form.cursor_position + 1).min(len);
                     }
                 }
             }
@@ -187,11 +190,15 @@ pub fn update(state: &mut AppState, action: Action) {
             Step::FillFields => {
                 let last_field = state.config.fields.len();
                 if state.form.selected_field == last_field {
-                    let missing: Vec<String> = state.config.fields
+                    let missing: Vec<String> = state
+                        .config
+                        .fields
                         .iter()
                         .filter(|f| f.required)
                         .filter(|f| {
-                            state.form.user_inputs
+                            state
+                                .form
+                                .user_inputs
                                 .get(&f.key)
                                 .map(|v| v.trim().is_empty())
                                 .unwrap_or(true)
@@ -217,7 +224,8 @@ pub fn update(state: &mut AppState, action: Action) {
                         match save_history(&entry) {
                             Ok(_) => {
                                 let history = load_history().unwrap_or_default();
-                                state.history_scroll_limitation = compute_history_total(history.len());
+                                state.history_scroll_limitation =
+                                    compute_history_total(history.len());
                             }
                             Err(e) => {
                                 set_message(state, format!("✗ History save error: {}", e));
@@ -318,13 +326,19 @@ pub fn update(state: &mut AppState, action: Action) {
                 if field.field_type == FieldType::Select {
                     if let Some(values) = &field.values {
                         if let Some(first) = values.first() {
-                            state.form.user_inputs.insert(field.key.clone(), first.clone());
+                            state
+                                .form
+                                .user_inputs
+                                .insert(field.key.clone(), first.clone());
                         }
                     }
                 }
                 if field.persistent {
                     if let Some(value) = persistent_data.get(&field.key) {
-                        state.form.user_inputs.insert(field.key.clone(), value.clone());
+                        state
+                            .form
+                            .user_inputs
+                            .insert(field.key.clone(), value.clone());
                     }
                 }
             }
@@ -385,13 +399,9 @@ fn current_field(state: &AppState) -> Option<&crate::config::FieldConfig> {
 }
 
 fn move_select(state: &mut AppState, direction: isize) {
-    let Some((key, values, persistent)) = current_field(state).and_then(|field| {
-        Some((
-            field.key.clone(),
-            field.values.clone()?,
-            field.persistent,
-        ))
-    }) else {
+    let Some((key, values, persistent)) = current_field(state)
+        .and_then(|field| Some((field.key.clone(), field.values.clone()?, field.persistent)))
+    else {
         return;
     };
 
@@ -420,7 +430,11 @@ fn insert_text(state: &mut AppState, text: &str) {
         let Some(field) = current_field(state) else {
             return;
         };
-        (field.field_type.clone(), field.key.clone(), field.persistent)
+        (
+            field.field_type.clone(),
+            field.key.clone(),
+            field.persistent,
+        )
     };
 
     match field_type {
@@ -431,9 +445,12 @@ fn insert_text(state: &mut AppState, text: &str) {
         }
         FieldType::Text => {
             // TUI fields are single-line: normalize pasted line breaks to spaces.
-            let normalized = text.replace("\r\n", " ").replace('\r', " ").replace('\n', " ");
+            let normalized = text
+                .replace("\r\n", " ")
+                .replace('\r', " ")
+                .replace('\n', " ");
             insert_at_cursor(state, &key, &normalized);
-        },
+        }
     }
 
     if persistent {
@@ -462,11 +479,16 @@ fn char_byte_index(value: &str, char_index: usize) -> Option<usize> {
 }
 
 fn save_persistent_fields(state: &AppState) {
-    let persistent_data: IndexMap<String, String> = state.config.fields
+    let persistent_data: IndexMap<String, String> = state
+        .config
+        .fields
         .iter()
         .filter(|f| f.persistent)
         .filter_map(|f| {
-            state.form.user_inputs.get(&f.key)
+            state
+                .form
+                .user_inputs
+                .get(&f.key)
                 .map(|v| (f.key.clone(), v.clone()))
         })
         .collect();
@@ -474,7 +496,9 @@ fn save_persistent_fields(state: &AppState) {
 }
 
 fn sync_select_position(state: &mut AppState) {
-    let Some((field_type, key, values)) = state.config.fields
+    let Some((field_type, key, values)) = state
+        .config
+        .fields
         .get(state.form.selected_field)
         .map(|field| (field.field_type, field.key.clone(), field.values.clone()))
     else {
@@ -495,7 +519,9 @@ fn sync_select_position(state: &mut AppState) {
         return;
     }
 
-    let position = state.form.user_inputs
+    let position = state
+        .form
+        .user_inputs
         .get(&key)
         .and_then(|value| values.iter().position(|item| item == value))
         .unwrap_or(0);

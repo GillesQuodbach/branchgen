@@ -1,21 +1,21 @@
-use std::io::stdout;
-use clap::Parser;
 use crate::app::App;
 use crate::cli::Args;
 use crate::config::{generate_default_config, load_config};
-use std::panic;
 use crate::error::AppError;
+use clap::Parser;
+use std::io::stdout;
+use std::panic;
 
+mod actions;
 mod app;
-mod error;
+mod cli;
 mod config;
 mod config_template;
-mod cli;
-mod state;
-mod actions;
+mod error;
 mod generator;
-mod storage;
 mod git;
+mod state;
+mod storage;
 mod ui;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -35,10 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     panic::set_hook(Box::new(|panic_info| {
         let _ = crossterm::terminal::disable_raw_mode();
-        let _ = crossterm::execute!(
-            stdout(),
-            crossterm::terminal::LeaveAlternateScreen,
-        );
+        let _ = crossterm::execute!(stdout(), crossterm::terminal::LeaveAlternateScreen,);
         eprintln!("Panic: {:?}", panic_info);
     }));
 

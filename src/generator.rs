@@ -1,28 +1,31 @@
-use indexmap::IndexMap;
 use crate::config::{FieldConfig, FormatConfig, Normalize};
 use crate::state::{FormState, GeneratedResult};
+use indexmap::IndexMap;
 
 // Le fichier de config
 // formats: &FormatConfig {
-    // branch:   "{type}/{ticket}-{description}",
-    // commit:   "{type}: {description}",
-    // pr_title: "[{ticket}] {description}",
-    // }
+// branch:   "{type}/{ticket}-{description}",
+// commit:   "{type}: {description}",
+// pr_title: "[{ticket}] {description}",
+// }
 
 // Ce que le user a entré dans la TUI
 // form: &FormState {
-    // user_inputs: {
-    // "type":        "feat",
-    // "ticket":      "42",
-    // "description": "add-login-page",
-    // }
-    // }
-pub fn generate_result(form: &FormState, formats: &FormatConfig, fields: &[FieldConfig]) -> GeneratedResult{
-
+// user_inputs: {
+// "type":        "feat",
+// "ticket":      "42",
+// "description": "add-login-page",
+// }
+// }
+pub fn generate_result(
+    form: &FormState,
+    formats: &FormatConfig,
+    fields: &[FieldConfig],
+) -> GeneratedResult {
     let mut normalized_inputs = form.user_inputs.clone();
 
     for field in fields {
-        if let Some(value) = normalized_inputs.get_mut(&field.key){
+        if let Some(value) = normalized_inputs.get_mut(&field.key) {
             *value = match field.normalize {
                 Normalize::None => value.clone(),
                 Normalize::Spaces => value.trim().replace(' ', "-"),
@@ -61,8 +64,8 @@ pub fn generate_result(form: &FormState, formats: &FormatConfig, fields: &[Field
 pub fn resolve_template(template: &str, values: &IndexMap<String, String>) -> String {
     let mut result = template.to_string();
     for (key, value) in values {
-            let placeholder = format!("{{{}}}", key);
-            result = result.replace(&placeholder, &value);
+        let placeholder = format!("{{{}}}", key);
+        result = result.replace(&placeholder, &value);
     }
     result
 }
@@ -110,20 +113,44 @@ mod tests {
         };
 
         let formats = FormatConfig {
-            branch:   "{type}/{ticket}-{description}".to_string(),
-            commit:   "{type}: {description}".to_string(),
+            branch: "{type}/{ticket}-{description}".to_string(),
+            commit: "{type}: {description}".to_string(),
             pr_title: "[{ticket}] {description}".to_string(),
         };
 
         let fields = vec![
-            FieldConfig { key: "type".to_string(),        label: "Type".to_string(),        field_type: FieldType::Select, required: true,  values: None, normalize: Normalize::None, persistent: false },
-            FieldConfig { key: "ticket".to_string(),      label: "Ticket".to_string(),      field_type: FieldType::Number, required: true,  values: None, normalize: Normalize::None, persistent: false },
-            FieldConfig { key: "description".to_string(), label: "Description".to_string(), field_type: FieldType::Text,   required: true,  values: None, normalize: Normalize::None, persistent: false },
+            FieldConfig {
+                key: "type".to_string(),
+                label: "Type".to_string(),
+                field_type: FieldType::Select,
+                required: true,
+                values: None,
+                normalize: Normalize::None,
+                persistent: false,
+            },
+            FieldConfig {
+                key: "ticket".to_string(),
+                label: "Ticket".to_string(),
+                field_type: FieldType::Number,
+                required: true,
+                values: None,
+                normalize: Normalize::None,
+                persistent: false,
+            },
+            FieldConfig {
+                key: "description".to_string(),
+                label: "Description".to_string(),
+                field_type: FieldType::Text,
+                required: true,
+                values: None,
+                normalize: Normalize::None,
+                persistent: false,
+            },
         ];
 
         let result = generate_result(&form, &formats, &fields);
-        assert_eq!(result.branch,   "feat/42-add-login");
-        assert_eq!(result.commit,   "feat: add-login");
+        assert_eq!(result.branch, "feat/42-add-login");
+        assert_eq!(result.commit, "feat: add-login");
         assert_eq!(result.pr_title, "[42] add-login");
     }
 
@@ -141,19 +168,35 @@ mod tests {
         };
 
         let formats = FormatConfig {
-            branch:   "{type}/{title}".to_string(),
-            commit:   "{type}: {title}".to_string(),
+            branch: "{type}/{title}".to_string(),
+            commit: "{type}: {title}".to_string(),
             pr_title: "{type}: {title}".to_string(),
         };
 
         let fields = vec![
-            FieldConfig { key: "type".to_string(),  label: "Type".to_string(),  field_type: FieldType::Select, required: true, values: None, normalize: Normalize::None, persistent: false },
-            FieldConfig { key: "title".to_string(), label: "Title".to_string(), field_type: FieldType::Text,   required: true, values: None, normalize: Normalize::Spaces, persistent: false },
+            FieldConfig {
+                key: "type".to_string(),
+                label: "Type".to_string(),
+                field_type: FieldType::Select,
+                required: true,
+                values: None,
+                normalize: Normalize::None,
+                persistent: false,
+            },
+            FieldConfig {
+                key: "title".to_string(),
+                label: "Title".to_string(),
+                field_type: FieldType::Text,
+                required: true,
+                values: None,
+                normalize: Normalize::Spaces,
+                persistent: false,
+            },
         ];
 
         let result = generate_result(&form, &formats, &fields);
-        assert_eq!(result.branch,   "feat/My-New-Feature");
-        assert_eq!(result.commit,   "feat: My-New-Feature");
+        assert_eq!(result.branch, "feat/My-New-Feature");
+        assert_eq!(result.commit, "feat: My-New-Feature");
         assert_eq!(result.pr_title, "feat: My-New-Feature");
     }
 }

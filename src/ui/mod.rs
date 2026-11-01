@@ -1,11 +1,11 @@
-use ratatui::Frame;
 use crate::state::{AppState, Step};
+use ratatui::Frame;
 
 pub mod form;
+pub mod history;
 pub mod input;
 pub mod layout;
 pub mod result;
-pub mod history;
 
 pub fn render(frame: &mut Frame, state: &AppState) {
     match state.step {

@@ -1,9 +1,9 @@
-use std::fs;
-use std::path::PathBuf;
+use crate::error::AppError;
 use directories::ProjectDirs;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use crate::error::AppError;
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct History {
@@ -14,14 +14,16 @@ pub struct History {
 }
 
 fn build_history_path() -> Result<PathBuf, AppError> {
-    let config_dir = ProjectDirs::from("", "", "branchgen")
-        .ok_or(AppError::Config("Impossible de trouver le dossier config".into()))?;
+    let config_dir = ProjectDirs::from("", "", "branchgen").ok_or(AppError::Config(
+        "Impossible de trouver le dossier config".into(),
+    ))?;
     Ok(config_dir.config_dir().join("history.json"))
 }
 
 fn build_persistent_path() -> Result<PathBuf, AppError> {
-    let config_dir = ProjectDirs::from("", "", "branchgen")
-        .ok_or(AppError::Config("Impossible de trouver le dossier config".into()))?;
+    let config_dir = ProjectDirs::from("", "", "branchgen").ok_or(AppError::Config(
+        "Impossible de trouver le dossier config".into(),
+    ))?;
     Ok(config_dir.config_dir().join("persistent.json"))
 }
 

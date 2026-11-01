@@ -1,6 +1,6 @@
-use std::time::Instant;
-use indexmap::IndexMap;
 use crate::config::AppConfig;
+use indexmap::IndexMap;
+use std::time::Instant;
 
 pub struct AppState {
     pub step: Step,
@@ -21,7 +21,7 @@ pub struct AppState {
 pub enum Step {
     FillFields,
     ShowResults,
-    History
+    History,
 }
 
 pub struct FormState {

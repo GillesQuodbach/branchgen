@@ -1,9 +1,9 @@
-use std::fs;
-use std::path::PathBuf;
+use crate::config_template::DEFAULT_CONFIG;
+use crate::error::AppError;
 use directories::ProjectDirs;
 use serde::Deserialize;
-use crate::error::AppError;
-use crate::config_template::DEFAULT_CONFIG;
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {
@@ -37,16 +37,16 @@ pub struct FormatConfig {
 pub enum FieldType {
     Text,
     Select,
-    Number
+    Number,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum Normalize {
     None,
-    Spaces, // space to hyphen
-    Uppercase, // all in lowercase
-    Lowercase, // all in uppercase
+    Spaces,               // space to hyphen
+    Uppercase,            // all in lowercase
+    Lowercase,            // all in uppercase
     LowercaseFirstLetter, // first letter in uppercase
     UppercaseFirstLetter, // first letter in uppercase
 }
@@ -82,12 +82,12 @@ mod tests {
 fn build_config_path() -> Result<PathBuf, AppError> {
     // On récupère les chemins standards de l'application "branchgen" suivant l'OS
     // (ex: ~/.config/branchgen sur Linux, ~/Library/Application Support/branchgen sur macOS)
-    let config_dir = ProjectDirs::from("", "", "branchgen")
-        .ok_or(AppError::Config("Impossible de trouver le dossier config".into()))?;
+    let config_dir = ProjectDirs::from("", "", "branchgen").ok_or(AppError::Config(
+        "Impossible de trouver le dossier config".into(),
+    ))?;
 
     Ok(config_dir.config_dir().join("config.toml"))
 }
-
 
 fn get_config_path() -> Result<PathBuf, AppError> {
     // On récupère les chemins standards de l'application "branchgen" suivant l'OS
@@ -96,14 +96,15 @@ fn get_config_path() -> Result<PathBuf, AppError> {
 
     if !file_path.exists() {
         // On crée physiquement le fichier
-        return Err(AppError::Config("Config file not found. Run branchgen --init".into()))
+        return Err(AppError::Config(
+            "Config file not found. Run branchgen --init".into(),
+        ));
     }
     Ok(file_path)
 }
 
 // construit mes structs a partir du fichier toml
-pub fn load_config() -> Result<AppConfig, AppError>  {
-
+pub fn load_config() -> Result<AppConfig, AppError> {
     let file_path = get_config_path()?;
     // lit le contenu du fichier = cat config.toml
     let content = fs::read_to_string(&file_path)?;
@@ -114,11 +115,10 @@ pub fn load_config() -> Result<AppConfig, AppError>  {
 }
 
 pub fn generate_default_config() -> Result<(), AppError> {
-
     let file_path = build_config_path()?;
 
     if file_path.exists() {
-        return Err(AppError::Config("Config déja existante".into()))
+        return Err(AppError::Config("Config déja existante".into()));
     }
 
     if let Some(parent) = file_path.parent() {

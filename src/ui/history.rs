@@ -1,10 +1,12 @@
+use crate::state::AppState;
+use crate::storage::load_history;
+use crate::ui::layout::{Theme, base_layout, render_tabs};
 use ratatui::Frame;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span, Text};
-use ratatui::widgets::{Block, BorderType, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
-use crate::state::AppState;
-use crate::storage::load_history;
-use crate::ui::layout::{base_layout, render_tabs, Theme};
+use ratatui::widgets::{
+    Block, BorderType, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState,
+};
 
 pub fn render_history(frame: &mut Frame, state: &AppState) {
     let (tabs_area, content_area, status_area) = base_layout(frame);
@@ -30,19 +32,28 @@ pub fn render_history(frame: &mut Frame, state: &AppState) {
             }
 
             for (field_index, (label, value, color)) in [
-                ("  date     : ", item.date.as_str(),     Theme::TEXT),
-                ("  branch   : ", item.branch.as_str(),   Theme::HISTORY_BRANCH),
-                ("  commit   : ", item.commit.as_str(),   Theme::HISTORY_COMMIT),
+                ("  date     : ", item.date.as_str(), Theme::TEXT),
+                ("  branch   : ", item.branch.as_str(), Theme::HISTORY_BRANCH),
+                ("  commit   : ", item.commit.as_str(), Theme::HISTORY_COMMIT),
                 ("  pr_title : ", item.pr_title.as_str(), Theme::AMBER),
-            ].iter().enumerate() {
+            ]
+            .iter()
+            .enumerate()
+            {
                 let is_selected = line_index == state.history_selected_line;
                 lines.push(Line::from(vec![
                     Span::styled(*label, Style::default().fg(Theme::TEXT_MUTED)),
-                    Span::styled(*value, if is_selected {
-                        Style::default().fg(Theme::BG).bg(*color).add_modifier(Modifier::BOLD)
-                    } else {
-                        Style::default().fg(*color)
-                    }),
+                    Span::styled(
+                        *value,
+                        if is_selected {
+                            Style::default()
+                                .fg(Theme::BG)
+                                .bg(*color)
+                                .add_modifier(Modifier::BOLD)
+                        } else {
+                            Style::default().fg(*color)
+                        },
+                    ),
                 ]));
                 line_index += 1;
             }
@@ -56,14 +67,16 @@ pub fn render_history(frame: &mut Frame, state: &AppState) {
         state.history_selected_line - visible_height + 1
     };
 
-    let mut scrollbar_state = ScrollbarState::new(lines.len())
-        .position(scroll_offset);
+    let mut scrollbar_state = ScrollbarState::new(lines.len()).position(scroll_offset);
 
     let block = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Plain)
         .border_style(Style::default().fg(Theme::BORDER))
-        .title(Span::styled(" History ", Style::default().fg(Theme::ACCENT)))
+        .title(Span::styled(
+            " History ",
+            Style::default().fg(Theme::ACCENT),
+        ))
         .style(Style::default().bg(Theme::BG));
 
     let paragraph = Paragraph::new(Text::from(lines))
@@ -93,20 +106,26 @@ pub fn render_history(frame: &mut Frame, state: &AppState) {
         Span::styled("Create  ", Style::default().fg(Theme::TEXT_MUTED)),
         Span::styled("q ", Style::default().fg(Theme::ACCENT)),
         Span::styled("Quit", Style::default().fg(Theme::TEXT_MUTED)),
-    ])).style(Style::default().bg(Theme::BG_SURFACE));
+    ]))
+    .style(Style::default().bg(Theme::BG_SURFACE));
 
-    let show_message = state.git_message_time
+    let show_message = state
+        .git_message_time
         .map(|t| t.elapsed().as_secs() < 2)
         .unwrap_or(false);
 
     let status = if show_message {
         match &state.git_message {
-            Some(msg) if msg.starts_with('✓') => Paragraph::new(
-                Span::styled(format!(" {}", msg), Style::default().fg(Theme::GREEN))
-            ).style(Style::default().bg(Theme::BG_SURFACE)),
-            Some(msg) => Paragraph::new(
-                Span::styled(format!(" {}", msg), Style::default().fg(Theme::AMBER))
-            ).style(Style::default().bg(Theme::BG_SURFACE)),
+            Some(msg) if msg.starts_with('✓') => Paragraph::new(Span::styled(
+                format!(" {}", msg),
+                Style::default().fg(Theme::GREEN),
+            ))
+            .style(Style::default().bg(Theme::BG_SURFACE)),
+            Some(msg) => Paragraph::new(Span::styled(
+                format!(" {}", msg),
+                Style::default().fg(Theme::AMBER),
+            ))
+            .style(Style::default().bg(Theme::BG_SURFACE)),
             None => default_status,
         }
     } else {
