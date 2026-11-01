@@ -7,11 +7,6 @@ use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, List, ListItem, Paragraph};
 
-pub fn render_select_type(frame: &mut Frame, state: &AppState) {
-    let (tabs_area, _content_area, _status_area) = base_layout(frame);
-    render_tabs(frame, tabs_area, &state.step);
-}
-
 pub fn render_fields(frame: &mut Frame, state: &AppState) {
     let (tabs_area, content_area, status_area) = base_layout(frame);
     render_tabs(frame, tabs_area, &state.step);

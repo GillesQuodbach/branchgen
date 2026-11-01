@@ -53,19 +53,18 @@ pub fn generate_result(
     let commit = resolve_template(&formats.commit, &normalized_inputs);
     let pr_title = resolve_template(&formats.pr_title, &normalized_inputs);
 
-    let generated_result = GeneratedResult {
+    GeneratedResult {
         branch,
         commit,
         pr_title,
-    };
-    generated_result
+    }
 }
 
 pub fn resolve_template(template: &str, values: &IndexMap<String, String>) -> String {
     let mut result = template.to_string();
     for (key, value) in values {
         let placeholder = format!("{{{}}}", key);
-        result = result.replace(&placeholder, &value);
+        result = result.replace(&placeholder, value);
     }
     result
 }

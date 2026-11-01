@@ -42,41 +42,15 @@ pub enum FieldType {
 
 #[derive(Debug, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum Normalize {
+    #[default]
     None,
     Spaces,               // space to hyphen
     Uppercase,            // all in lowercase
     Lowercase,            // all in uppercase
     LowercaseFirstLetter, // first letter in uppercase
     UppercaseFirstLetter, // first letter in uppercase
-}
-
-impl Default for Normalize {
-    fn default() -> Self {
-        Normalize::None
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_parse_config() {
-        let toml_str = r#"
-            [[fields]]
-            key = "ticket"
-            label = "Numero de ticket"
-            type = "number"
-            required = true
-            [formats]
-            branch = "{type}/{ticket}-{description}"
-            commit = "{type}: {description}"
-            pr_title = "[{ticket}] {description}"
-        "#;
-
-        let config: AppConfig = toml::from_str(toml_str).unwrap();
-        assert_eq!(config.fields[0].key, "ticket");
-    }
 }
 
 fn build_config_path() -> Result<PathBuf, AppError> {
@@ -128,4 +102,26 @@ pub fn generate_default_config() -> Result<(), AppError> {
     fs::write(&file_path, DEFAULT_CONFIG)?;
     println!("Generated default config file: {:?}", file_path);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_parse_config() {
+        let toml_str = r#"
+            [[fields]]
+            key = "ticket"
+            label = "Numero de ticket"
+            type = "number"
+            required = true
+            [formats]
+            branch = "{type}/{ticket}-{description}"
+            commit = "{type}: {description}"
+            pr_title = "[{ticket}] {description}"
+        "#;
+
+        let config: AppConfig = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.fields[0].key, "ticket");
+    }
 }

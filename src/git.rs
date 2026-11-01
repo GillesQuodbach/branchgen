@@ -17,15 +17,6 @@ pub fn is_git_repo() -> bool {
     std::path::Path::new(".git").exists()
 }
 
-pub fn branch_exists(branch_name: &str) -> bool {
-    Command::new("git")
-        .args(["show-ref", "--verify", "--quiet"])
-        .arg(format!("refs/heads/{branch_name}"))
-        .status()
-        .map(|status| status.success())
-        .unwrap_or(false)
-}
-
 pub fn checkout_branch(branch_name: &str) -> Result<(), AppError> {
     let output = Command::new("git")
         .args(["checkout", branch_name])

@@ -31,14 +31,13 @@ pub fn render_history(frame: &mut Frame, state: &AppState) {
                 line_index += 1;
             }
 
-            for (field_index, (label, value, color)) in [
+            for (label, value, color) in [
                 ("  date     : ", item.date.as_str(), Theme::TEXT),
                 ("  branch   : ", item.branch.as_str(), Theme::HISTORY_BRANCH),
                 ("  commit   : ", item.commit.as_str(), Theme::HISTORY_COMMIT),
                 ("  pr_title : ", item.pr_title.as_str(), Theme::AMBER),
             ]
             .iter()
-            .enumerate()
             {
                 let is_selected = line_index == state.history_selected_line;
                 lines.push(Line::from(vec![

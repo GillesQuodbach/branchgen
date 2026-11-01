@@ -16,15 +16,12 @@ pub enum Action {
     Enter,
     Backspace,
     Delete,
-    ChangeStep(Step),
-    Generate,
     CreateBranch,
     InputCharacter(char),
     Paste(String),
     None,
     NextTab,
     PrevTab,
-    HistoryLoaded(usize),
     CopyLineFromResults,
     CopyLineFromHistory,
     ResetForm,
@@ -86,9 +83,7 @@ pub fn update(state: &mut AppState, action: Action) {
 
         Action::MoveLeft => {
             if state.form.selected_field < state.config.fields.len() {
-                let field_type = state.config.fields[state.form.selected_field]
-                    .field_type
-                    .clone();
+                let field_type = state.config.fields[state.form.selected_field].field_type;
                 match field_type {
                     FieldType::Select => move_select(state, -1),
                     FieldType::Text | FieldType::Number => {
@@ -102,7 +97,7 @@ pub fn update(state: &mut AppState, action: Action) {
             if state.form.selected_field < state.config.fields.len() {
                 let (field_type, key) = {
                     let field = &state.config.fields[state.form.selected_field];
-                    (field.field_type.clone(), field.key.clone())
+                    (field.field_type, field.key.clone())
                 };
                 match field_type {
                     FieldType::Select => move_select(state, 1),
@@ -130,15 +125,13 @@ pub fn update(state: &mut AppState, action: Action) {
                     FieldType::Text | FieldType::Number => {
                         let key = field.key.clone();
                         let persistent = field.persistent;
-                        if let Some(value) = state.form.user_inputs.get_mut(&key) {
-                            if state.form.cursor_position > 0 {
-                                if let Some(byte_index) =
-                                    char_byte_index(value, state.form.cursor_position - 1)
-                                {
-                                    value.remove(byte_index);
-                                    state.form.cursor_position -= 1;
-                                }
-                            }
+                        if let Some(value) = state.form.user_inputs.get_mut(&key)
+                            && state.form.cursor_position > 0
+                            && let Some(byte_index) =
+                                char_byte_index(value, state.form.cursor_position - 1)
+                        {
+                            value.remove(byte_index);
+                            state.form.cursor_position -= 1;
                         }
                         if persistent {
                             save_persistent_fields(state);
@@ -155,12 +148,11 @@ pub fn update(state: &mut AppState, action: Action) {
                     FieldType::Text | FieldType::Number => {
                         let key = field.key.clone();
                         let persistent = field.persistent;
-                        if let Some(value) = state.form.user_inputs.get_mut(&key) {
-                            if let Some(byte_index) =
+                        if let Some(value) = state.form.user_inputs.get_mut(&key)
+                            && let Some(byte_index) =
                                 char_byte_index(value, state.form.cursor_position)
-                            {
-                                value.remove(byte_index);
-                            }
+                        {
+                            value.remove(byte_index);
                         }
                         if persistent {
                             save_persistent_fields(state);
@@ -168,11 +160,6 @@ pub fn update(state: &mut AppState, action: Action) {
                     }
                 }
             }
-        }
-
-        Action::Generate => {
-            let result = generate_result(&state.form, &state.config.formats, &state.config.fields);
-            state.result = Some(result);
         }
 
         Action::CreateBranch => {
@@ -184,10 +171,8 @@ pub fn update(state: &mut AppState, action: Action) {
             }
         }
 
-        Action::ChangeStep(step) => state.step = step,
-
-        Action::Enter => match state.step {
-            Step::FillFields => {
+        Action::Enter => {
+            if state.step == Step::FillFields {
                 let last_field = state.config.fields.len();
                 if state.form.selected_field == last_field {
                     let missing: Vec<String> = state
@@ -247,8 +232,7 @@ pub fn update(state: &mut AppState, action: Action) {
                     sync_select_position(state);
                 }
             }
-            _ => {}
-        },
+        }
 
         Action::NextTab => {
             state.step = match state.step {
@@ -270,12 +254,6 @@ pub fn update(state: &mut AppState, action: Action) {
             if state.step == Step::History {
                 refresh_history_position(state);
             }
-        }
-
-        Action::HistoryLoaded(total) => {
-            state.history_scroll_limitation = total;
-            state.history_scroll = 0;
-            state.history_selected_line = 0;
         }
 
         Action::CopyLineFromResults => {
@@ -323,23 +301,22 @@ pub fn update(state: &mut AppState, action: Action) {
             let persistent_data = crate::storage::load_persistent();
 
             for field in &state.config.fields {
-                if field.field_type == FieldType::Select {
-                    if let Some(values) = &field.values {
-                        if let Some(first) = values.first() {
-                            state
-                                .form
-                                .user_inputs
-                                .insert(field.key.clone(), first.clone());
-                        }
-                    }
+                if field.field_type == FieldType::Select
+                    && let Some(values) = &field.values
+                    && let Some(first) = values.first()
+                {
+                    state
+                        .form
+                        .user_inputs
+                        .insert(field.key.clone(), first.clone());
                 }
-                if field.persistent {
-                    if let Some(value) = persistent_data.get(&field.key) {
-                        state
-                            .form
-                            .user_inputs
-                            .insert(field.key.clone(), value.clone());
-                    }
+                if field.persistent
+                    && let Some(value) = persistent_data.get(&field.key)
+                {
+                    state
+                        .form
+                        .user_inputs
+                        .insert(field.key.clone(), value.clone());
                 }
             }
 
@@ -430,11 +407,7 @@ fn insert_text(state: &mut AppState, text: &str) {
         let Some(field) = current_field(state) else {
             return;
         };
-        (
-            field.field_type.clone(),
-            field.key.clone(),
-            field.persistent,
-        )
+        (field.field_type, field.key.clone(), field.persistent)
     };
 
     match field_type {
@@ -445,10 +418,7 @@ fn insert_text(state: &mut AppState, text: &str) {
         }
         FieldType::Text => {
             // TUI fields are single-line: normalize pasted line breaks to spaces.
-            let normalized = text
-                .replace("\r\n", " ")
-                .replace('\r', " ")
-                .replace('\n', " ");
+            let normalized = text.replace("\r\n", " ").replace(['\r', '\n'], " ");
             insert_at_cursor(state, &key, &normalized);
         }
     }

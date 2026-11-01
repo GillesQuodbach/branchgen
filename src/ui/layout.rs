@@ -2,7 +2,7 @@ use crate::state::Step;
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::Line;
-use ratatui::style::{Color, Modifier, Style, Stylize};
+use ratatui::style::{Color, Style, Stylize};
 use ratatui::widgets::{Block, BorderType, Borders, Tabs};
 pub struct Theme;
 
@@ -65,7 +65,4 @@ pub fn render_tabs(frame: &mut Frame, area: Rect, step: &Step) {
         .padding(" ", " ");
 
     frame.render_widget(tabs, area);
-}
-pub fn render_layout(frame: &mut Frame, state: Rect) {
-    // TODO
 }

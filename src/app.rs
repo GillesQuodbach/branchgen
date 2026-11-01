@@ -24,20 +24,19 @@ impl App {
         let mut user_inputs = IndexMap::new();
 
         for field in &config.fields {
-            if field.field_type == FieldType::Select {
-                if let Some(values) = &field.values {
-                    if let Some(first) = values.first() {
-                        user_inputs.insert(field.key.clone(), first.clone());
-                    }
-                }
+            if field.field_type == FieldType::Select
+                && let Some(values) = &field.values
+                && let Some(first) = values.first()
+            {
+                user_inputs.insert(field.key.clone(), first.clone());
             }
         }
 
         for field in &config.fields {
-            if field.persistent {
-                if let Some(value) = persistent_data.get(&field.key) {
-                    user_inputs.insert(field.key.clone(), value.clone());
-                }
+            if field.persistent
+                && let Some(value) = persistent_data.get(&field.key)
+            {
+                user_inputs.insert(field.key.clone(), value.clone());
             }
         }
         let mut form = FormState {
@@ -47,16 +46,13 @@ impl App {
             cursor_position: 0,
         };
 
-        if let Some(field) = config.fields.first() {
-            if field.field_type == FieldType::Select {
-                if let Some(values) = &field.values {
-                    if let Some(value) = form.user_inputs.get(&field.key) {
-                        if let Some(position) = values.iter().position(|item| item == value) {
-                            form.select_input_position = position;
-                        }
-                    }
-                }
-            }
+        if let Some(field) = config.fields.first()
+            && field.field_type == FieldType::Select
+            && let Some(values) = &field.values
+            && let Some(value) = form.user_inputs.get(&field.key)
+            && let Some(position) = values.iter().position(|item| item == value)
+        {
+            form.select_input_position = position;
         }
 
         App {
